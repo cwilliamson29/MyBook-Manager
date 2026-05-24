@@ -1,9 +1,9 @@
 import tkinter as tk
 from tkinter import ttk
-from addSeries_Window import AddSeriesWindow
-from add_author_window import AddAuthorWindow
-import database
-from add_book_window import AddBookWindow
+from windows.addSeries_Window import AddSeriesWindow
+from windows.add_author_window import AddAuthorWindow
+from db import database
+from windows.add_book_window import AddBookWindow
 from book_table import BookTable
 
 # TODO: color coding based on genre

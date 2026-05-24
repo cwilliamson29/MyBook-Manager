@@ -1,7 +1,7 @@
 import tkinter as tk
 from tkinter import ttk, messagebox
-import database
-from edit_book_window import EditBookWindow
+from db import database
+from windows.edit_book_window import EditBookWindow
 
 
 class BookTable(tk.Frame):

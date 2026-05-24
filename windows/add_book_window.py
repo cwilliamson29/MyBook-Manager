@@ -1,7 +1,7 @@
 import tkinter as tk
 from tkinter import messagebox
 
-import database
+from db import database
 
 
 class AddBookWindow(tk.Toplevel):
