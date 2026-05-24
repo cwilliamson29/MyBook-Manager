@@ -2,7 +2,7 @@ import tkinter as tk
 from tkinter import ttk
 from windows.addSeries_Window import AddSeriesWindow
 from windows.add_author_window import AddAuthorWindow
-from db import database
+from db import database, db_get
 from windows.add_book_window import AddBookWindow
 from book_table import BookTable
 
@@ -93,7 +93,7 @@ class MyBookManager:
         mode = self.load_mode.get()
 
         if mode == "Default":
-            books = database.get_books()
+            books = db_get.get_books()
 
         elif mode == "By Author":
 
@@ -104,10 +104,10 @@ class MyBookManager:
 
             author_id = self.author_map[author_name]
 
-            books = database.get_books_by_author(author_id)
+            books = db_get.get_books_by_author(author_id)
 
         else:
-            books = database.get_books()
+            books = db_get.get_books()
 
         self.book_table.populate_table(books)
 
@@ -124,7 +124,7 @@ class MyBookManager:
 
     def load_authors_into_filter(self):
 
-        authors = database.get_authors()
+        authors = db_get.get_authors()
 
         self.author_map = {
             f"{first} {last}": author_id

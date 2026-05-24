@@ -1,7 +1,7 @@
 import tkinter as tk
 from tkinter import messagebox
 
-from db import database
+from db import db_add, db_get
 
 
 class AddBookWindow(tk.Toplevel):
@@ -38,7 +38,7 @@ class AddBookWindow(tk.Toplevel):
         self.title_entry.pack(side="left")
 
         # Load authors
-        self.authors = database.get_authors()
+        self.authors = db_get.get_authors()
 
         tk.Label(row_frame2, text="Select Author:").pack(side="left", pady=5)
 
@@ -128,7 +128,7 @@ class AddBookWindow(tk.Toplevel):
 
 
         author_id = self.author_map[author_name]
-        database.add_book(title, author_id, series_id, book_num, pub_date, nls_num)
+        db_add.add_book(title, author_id, series_id, book_num, pub_date, nls_num)
 
         messagebox.showinfo("Success", "Book added!")
         self.parent.load_books()
@@ -144,7 +144,7 @@ class AddBookWindow(tk.Toplevel):
         author_id = self.author_map[selected]
 
         # Get series from database
-        series = database.get_series_by_author(author_id)
+        series = db_get.get_series_by_author(author_id)
 
         # Clear existing menu
         menu = self.series_dropdown["menu"]

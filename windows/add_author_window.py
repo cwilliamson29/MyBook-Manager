@@ -1,6 +1,6 @@
 import tkinter as tk
 from tkinter import messagebox
-from db import database
+from db import db_add
 
 
 class AddAuthorWindow(tk.Toplevel):
@@ -46,7 +46,7 @@ class AddAuthorWindow(tk.Toplevel):
             messagebox.showerror("Error", "Author name cannot be empty")
             return
 
-        database.add_author(fname, lname)
+        db_add.add_author(fname, lname)
 
         messagebox.showinfo("Success", f"Author '{fname + " " + lname}' added!")
 

@@ -1,6 +1,6 @@
 import tkinter as tk
 from tkinter import messagebox
-from db import database
+from db import db_get, db_add
 
 
 class AddSeriesWindow(tk.Toplevel):
@@ -21,7 +21,7 @@ class AddSeriesWindow(tk.Toplevel):
         self.series_entry.pack(pady=5)
 
         # Load authors
-        self.authors = database.get_authors()
+        self.authors = db_get.get_authors()
 
         tk.Label(self, text="Select Author").pack(pady=5)
 
@@ -59,7 +59,7 @@ class AddSeriesWindow(tk.Toplevel):
             messagebox.showerror("Error", "Series title cannot be empty")
             return
 
-        database.add_series(seriesname, author_id)
+        db_add.add_series(seriesname, author_id)
 
         messagebox.showinfo("Success", f"Series '{seriesname}' added!")
 

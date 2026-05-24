@@ -1,6 +1,6 @@
 import tkinter as tk
 from tkinter import ttk, messagebox
-from db import database
+from db import db_get, db_update
 from windows.edit_book_window import EditBookWindow
 
 
@@ -65,7 +65,7 @@ class BookTable(tk.Frame):
             self.tree.delete(item)
 
         # Get books from database
-        books = database.get_books()
+        books = db_get.get_books()
 
         # print(books)
 
@@ -175,9 +175,9 @@ class BookTable(tk.Frame):
             return
 
         # Delete from database
-        database.delete_book(book_id)
+        db_update.delete_book(book_id)
 
         # Reload table
-        books = database.get_books()
+        books = db_get.get_books()
 
         self.populate_table(books)

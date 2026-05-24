@@ -1,6 +1,6 @@
 import tkinter as tk
 from tkinter import messagebox
-from db import database
+from db import db_get, db_update
 
 
 class EditBookWindow(tk.Toplevel):
@@ -15,7 +15,7 @@ class EditBookWindow(tk.Toplevel):
         self.geometry("400x165")
 
         # Get book data
-        book = database.get_book_by_id(book_id)
+        book = db_get.get_book_by_id(book_id)
 
         # Title
         tk.Label(self, text="Title:").grid(row=0, column=0, sticky="e",pady=5)
@@ -63,7 +63,7 @@ class EditBookWindow(tk.Toplevel):
             )
             return
 
-        database.update_book(
+        db_update.update_book(
             self.book_id,
             title,
             pub_date,
