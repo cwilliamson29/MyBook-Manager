@@ -5,6 +5,8 @@ from windows.add_author_window import AddAuthorWindow
 from db import database, db_get
 from windows.add_book_window import AddBookWindow
 from book_table import BookTable
+from windows.add_data_window import AddDataWindow
+
 
 # TODO: color coding based on genre
 # TODO: backups manual
@@ -41,6 +43,9 @@ class MyBookManager:
         open_book_btn.pack(side="left", padx=5)
         self.add_book_window = None
 
+        open_add_window = tk.Button(top_frame, text="Add", command=self.open_add_window)
+        open_add_window.pack(side="left", padx=5)
+        self.add_book_window = None
         # App label name
         label1 = tk.Label(top_frame, text="MyBook Manager", font=("Arial", 14, "bold"), fg="blue")
         label1.pack(side="right", padx=5)
@@ -136,6 +141,10 @@ class MyBookManager:
     # ----------
     # Windows
     #-----------
+    def open_add_window(self):
+
+        AddDataWindow(self)
+
     def add_series_window(self):
         # If window already exists, bring it to front
         if self.addSeries_Window is not None and self.addSeries_Window.winfo_exists():

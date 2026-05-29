@@ -22,7 +22,9 @@ def add_series(title, author_id):
 def add_genre(title):
     conn = get_connection()
     cursor = conn.cursor()
-    cursor.execute("INSERT INTO genre (title) VALUES (?)",(title))
+    cursor.execute("INSERT INTO genre (title) VALUES (?)", (title,))
+    conn.commit()
+    print("entered into db")
 
 def add_author(first_name, last_name):
     conn = get_connection()

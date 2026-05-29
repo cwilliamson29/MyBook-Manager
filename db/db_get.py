@@ -15,6 +15,15 @@ def get_authors():
     conn.close()
     return rows
 
+def get_genres():
+    conn = get_connection()
+    cur = conn.cursor()
+
+    cur.execute("SELECT id, title FROM genre ORDER BY title")
+    rows = cur.fetchall()
+
+    conn.close()
+    return rows
 
 def get_series_by_author(author_id):
     conn = get_connection()
