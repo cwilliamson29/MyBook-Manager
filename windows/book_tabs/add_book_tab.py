@@ -140,6 +140,7 @@ class AddBookTab(tk.Frame):
         if not first or not last:
             return
 
+        data = (first, last)
         # db_add.add_author(first, last)
 
         # self.first.delete(0, tk.END)

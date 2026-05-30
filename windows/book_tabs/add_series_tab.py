@@ -41,12 +41,19 @@ class SeriesTab(tk.Frame):
 
     def add_series(self):
 
-        title = self.title.get().strip()
+        title_get = self.title.get().strip()
+        author_name = self.selected_author.get()
 
-        if not title:
+        if not title_get or not author_name:
+            if not title_get:
+                self.title.config(bg="#FF9999", fg="black")
+            if not author_name or author_name == "":
+                self.dropdown.config(bg="#FF9999", fg="black")
             return
 
-        db_add.add_series()
+        author_id = self.author_map[author_name]
 
-        self.first.delete(0, tk.END)
-        self.last.delete(0, tk.END)
+        db_add.add_series(title_get,author_id)
+
+        self.title.delete(0, tk.END)
+        self.selected_author.set("")

@@ -20,20 +20,28 @@ def add_series(title, author_id):
     conn.close()
 
 def add_genre(title):
-    conn = get_connection()
-    cursor = conn.cursor()
-    cursor.execute("INSERT INTO genre (title) VALUES (?)", (title,))
-    conn.commit()
-    print("entered into db")
+    #conn = get_connection()
+    #cursor = conn.cursor()
+    #cursor.execute("INSERT INTO genre (title) VALUES (?)", (title,))
+    #conn.commit()
+    sql = "INSERT INTO genre (title) VALUES (?)"
+    db = add_to_db(sql, title)
+    return db
 
-def add_author(first_name, last_name):
+def add_author(data):
+    sql = "INSERT INTO authors (first_name, last_name) VALUES (?, ?)"
+    db = add_to_db(sql, data)
+    return db
+
+def add_to_db(sql, args):
     conn = get_connection()
     cursor = conn.cursor()
     try:
-        cursor.execute("INSERT INTO authors (first_name, last_name) VALUES (?, ?)", (first_name, last_name))
+        cursor.execute(sql, args)
         conn.commit()
+        return "success"
     except sqlite3.Error as e:
         print("SQLite error: ", e)
-        return None
+        return e
     finally:
         conn.close()

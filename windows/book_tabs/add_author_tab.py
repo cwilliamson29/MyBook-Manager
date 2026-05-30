@@ -18,21 +18,42 @@ class AuthorTab(tk.Frame):
         self.last = tk.Entry(self, width=20)
         self.last.grid(row=1, column=1, sticky="w")
 
+        self.error_label = tk.Label(self, text="", fg="red")
+        self.success_label = tk.Label(self, text="Author Successfully Added!", fg="green")
+
         tk.Button(
             self,
             text="Add Author",
             command=self.add_author
-        ).grid(row=2, column=1)
+        ).grid(row=3, column=1)
 
     def add_author(self):
+        self.error_label.grid_forget()
+        self.success_label.grid_forget()
 
-        first = self.first.get().strip()
-        last = self.last.get().strip()
+        fname = self.first.get().strip()
+        lname = self.last.get().strip()
 
-        if not first or not last:
+        if not fname or not lname:
+            if not fname:
+                self.first.config(bg="#FF9999", fg="black")
+
+            if not lname:
+                self.last.config(bg="#FF9999", fg="black")
+
+            self.error_label.config(text="First and last name required")
+            self.error_label.grid(row=2, column=1)
             return
+        data = (fname, lname)
+        db_attempt = db_add.add_author(data)
 
-        db_add.add_author(first, last)
+        if db_attempt == "success":
+            self.first.delete(0, tk.END)
+            self.last.delete(0, tk.END)
+            self.first.config(bg='SystemButtonFace')
+            self.last.config(bg='SystemButtonFace')
 
-        self.first.delete(0, tk.END)
-        self.last.delete(0, tk.END)
+            self.success_label.grid(row=2, column=1)
+        else:
+            self.error_label.config(text=f"Error: {db_attempt}!", fg="red")
+            self.error_label.grid(row=2, column=1)
