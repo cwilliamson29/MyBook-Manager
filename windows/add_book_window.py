@@ -1,11 +1,9 @@
 import tkinter as tk
 from tkinter import messagebox
-
 from db import db_add, db_get
 
 
 class AddBookWindow(tk.Toplevel):
-
     def __init__(self, parent):
         super().__init__(parent.root)
 

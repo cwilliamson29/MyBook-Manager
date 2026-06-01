@@ -19,6 +19,7 @@ def create_tables():
         nls_order TEXT,
         published_date TEXT,
         rating INTEGER,
+        isbn TEXT,
         genre_id INTEGER NOT NULL,
         author_id INTEGER NOT NULL,
         FOREIGN KEY(author_id) REFERENCES authors(id),

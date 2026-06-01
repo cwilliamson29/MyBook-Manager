@@ -43,20 +43,20 @@ class MyBookManager:
         # open_book_btn = tk.Button(top_frame, text="Add Book", command=self.open_add_book)
         # open_book_btn.pack(side="left", padx=5)
         # self.add_book_window = None
-        btn = ctk.CTkButton(top_frame, text="Add ctk", command=self.open_add_window, height=25, width=25, corner_radius=50)
-        btn.pack(side="left")
-        open_add_window = tk.Button(top_frame, text="Add", command=self.open_add_window, height=2, width=2)
-        open_add_window.pack(side="left", padx=5)
+        btn = ctk.CTkButton(top_frame, text=" + ", command=self.open_add_window, height=30, width=30, corner_radius=5, border_color="blue", font=("Arial", 30))
+        btn.pack(side="left", padx=5, pady=5)
+        # open_add_window = tk.Button(top_frame, text="Add", command=self.open_add_window, height=2, width=2)
+        # open_add_window.pack(side="left", padx=5)
         self.add_book_window = None
 
         # App label name
-        label1 = tk.Label(top_frame, text="MyBook Manager", font=("Arial", 14, "bold"), fg="blue")
+        label1 = tk.Label(top_frame, text="MyBook Manager", font=("Arial", 14, "bold"), fg="lightblue")
         label1.pack(side="right", padx=5)
 
         self.load_mode = tk.StringVar()
         self.load_mode.set("Default")
 
-        tk.Label(center_frame, text="Load Mode:").grid(row=0, column=0)
+        tk.Label(center_frame, text="Filter:").grid(row=0, column=0)
 
         mode_dropdown = ttk.Combobox(
             center_frame,
@@ -147,34 +147,34 @@ class MyBookManager:
     def open_add_window(self):
 
         AddDataWindow(self)
-
-    def add_series_window(self):
-        # If window already exists, bring it to front
-        if self.addSeries_Window is not None and self.addSeries_Window.winfo_exists():
-            self.addSeries_Window.lift()
-            self.addSeries_Window.focus_force()
-            return
-
-        # Create new window
-        self.addSeries_Window = AddSeriesWindow(self)
-
-    def open_add_author(self):
-
-        if self.add_author_window is not None and self.add_author_window.winfo_exists():
-            self.add_author_window.lift()
-            self.add_author_window.focus_force()
-            return
-
-
-        self.add_author_window = AddAuthorWindow(self)
-
-    def open_add_book(self):
-
-        if self.add_book_window is not None and self.add_book_window.winfo_exists():
-            self.add_book_window.lift()
-            return
-
-        self.add_book_window = AddBookWindow(self)
+    #
+    # def add_series_window(self):
+    #     # If window already exists, bring it to front
+    #     if self.addSeries_Window is not None and self.addSeries_Window.winfo_exists():
+    #         self.addSeries_Window.lift()
+    #         self.addSeries_Window.focus_force()
+    #         return
+    #
+    #     # Create new window
+    #     self.addSeries_Window = AddSeriesWindow(self)
+    #
+    # def open_add_author(self):
+    #
+    #     if self.add_author_window is not None and self.add_author_window.winfo_exists():
+    #         self.add_author_window.lift()
+    #         self.add_author_window.focus_force()
+    #         return
+    #
+    #
+    #     self.add_author_window = AddAuthorWindow(self)
+    #
+    # def open_add_book(self):
+    #
+    #     if self.add_book_window is not None and self.add_book_window.winfo_exists():
+    #         self.add_book_window.lift()
+    #         return
+    #
+    #     self.add_book_window = AddBookWindow(self)
 
 root = ctk.CTk()
 database.create_tables()
