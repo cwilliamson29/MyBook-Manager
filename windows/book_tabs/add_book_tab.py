@@ -15,10 +15,14 @@ class AddBookTab(tk.Frame):
         self.genres = db_get.get_genres_titles()
         self.series_map = {}
 
+        self.style = {
+            "width": 200,
+            "border_color": "gray40"
+        }
 
         # Book Title
         tk.Label(self, text="Book Title:").grid(row=0, column=0, sticky="e")
-        self.title_entry = ctk.CTkEntry(self, width=200)
+        self.title_entry = ctk.CTkEntry(self, **self.style)
         self.title_entry.grid(row=0, column=1, sticky="w", pady=2)
 
         # Authors
@@ -32,7 +36,8 @@ class AddBookTab(tk.Frame):
         self.author_dropdown = ctk.CTkComboBox(
             self,
             values=list(self.author_map.keys()),
-            variable=self.selected_author
+            variable=self.selected_author,
+            **self.style
         )
         self.author_dropdown.grid(row=1, column=1, sticky="w", pady=2)
         self.author_var = tk.StringVar()
@@ -43,21 +48,17 @@ class AddBookTab(tk.Frame):
 
         self.series_label = tk.Label(self, text="Select Series:")
 
-        # self.series_dropdown = tk.OptionMenu(
-        #     self,
-        #     self.series_var,
-        #     ""
-        # )
         self.series_dropdown = ctk.CTkComboBox(
             self,
             values=list(""),
-            variable=self.selected_series
+            variable=self.selected_series,
+            **self.style
         )
 
         # Number in series
         self.num_in_series = tk.Label(self, text="Book Number:")
 
-        self.num_in_series_entry = ctk.CTkEntry(self, width=200)
+        self.num_in_series_entry = ctk.CTkEntry(self, **self.style)
 
         # Hide initially
         self.series_dropdown.grid_forget()
@@ -66,7 +67,7 @@ class AddBookTab(tk.Frame):
 
         # Rating
         tk.Label(self, text="Rating").grid(row=4, column=0, sticky="e", pady=2)
-        self.rating_entry = ctk.CTkEntry(self, width=200)
+        self.rating_entry = ctk.CTkEntry(self, **self.style)
         self.rating_entry.grid(row=4, column=1, sticky="w", pady=2)
 
         # Genres
@@ -79,18 +80,19 @@ class AddBookTab(tk.Frame):
         self.genre_dropdown = ctk.CTkComboBox(
             self,
             values=list(self.genre_map.keys()),
-            variable=self.selected_genre
+            variable=self.selected_genre,
+            **self.style
         )
         self.genre_dropdown.grid(row=5, column=1, sticky="w", pady=2)
 
         # ISBN
         tk.Label(self, text="ISBN:").grid(row=6, column=0, sticky="e", pady=2)
-        self.isbn_entry = ctk.CTkEntry(self, width=200)
+        self.isbn_entry = ctk.CTkEntry(self, **self.style)
         self.isbn_entry.grid(row=6, column=1, sticky="w", pady=2)
 
         # NLS Order
         tk.Label(self, text="NLS Order:").grid(row=7, column=0, sticky="e", pady=2)
-        self.nls_order_entry = ctk.CTkEntry(self, width=200)
+        self.nls_order_entry = ctk.CTkEntry(self, **self.style)
         self.nls_order_entry.grid(row=7, column=1, sticky="w", pady=2)
 
         self.error_label = tk.Label(self, text="", fg="red")
@@ -165,10 +167,16 @@ class AddBookTab(tk.Frame):
         if not title or not author_name or not genre:
             if not title:
                 self.title_entry.configure(border_color="red")
+            else:
+                self.title_entry.configure(**self.style)
             if not author_name:
                 self.author_dropdown.configure(border_color="red")
+            else:
+                self.author_dropdown.configure(**self.style)
             if not genre:
                 self.genre_dropdown.configure(border_color="red")
+            else:
+                self.genre_dropdown.configure(**self.style)
 
             self.error_label.config(text="Title, author, and Genre required")
             self.error_label.grid(row=8, column=1)

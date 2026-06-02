@@ -51,14 +51,7 @@ class BookTable(tk.Frame):
         self.tree.column("ISBN", width=130, stretch=False)
         self.tree.column("NLS Order", width=150)
 
-        self.tree.tag_configure("oddrow", background="#cccccc", foreground="black")
-        self.tree.tag_configure("evenrow", background="white", foreground="black")
-        #Genre Tags
-        self.genre_tags = db_get.get_genres()
-        for genre in self.genre_tags:
-            print(genre)
-            if genre[2] is not None:
-                self.tree.tag_configure(genre[1], background=genre[2], foreground="black")
+        self.genre_tags ={}
 
         self.tree.bind("<Button-1>", self.on_click)
 
@@ -79,7 +72,14 @@ class BookTable(tk.Frame):
 
 
     def populate_table(self, books):
-
+        self.tree.tag_configure("oddrow", background="#cccccc", foreground="black")
+        self.tree.tag_configure("evenrow", background="white", foreground="black")
+        # Genre Tags
+        self.genre_tags = db_get.get_genres()
+        for genre in self.genre_tags:
+            print(genre)
+            if genre[2] is not None:
+                self.tree.tag_configure(genre[1], background=genre[2], foreground="black")
         # clear old rows
         for row in self.tree.get_children():
             self.tree.delete(row)

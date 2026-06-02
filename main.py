@@ -1,16 +1,20 @@
 import tkinter as tk
 from tkinter import ttk
 import customtkinter as ctk
+from PIL import Image, ImageTk
+
 
 from db import database, db_get
 from book_table import BookTable
 from windows.x.add_data_window import AddDataWindow
 
 
-# TODO: color coding based on genre
 # TODO: backups manual
+# TODO: Settings Window
 # TODO: description/review
-# TODO: row seperators - not possible
+# TODO: mp3 playback
+# TODO: Menu bar
+# TODO: row separators - not possible
 # TODO: research print function
 # TODO: research  built in mp3 player
 # TODO: xbox 360 games
@@ -21,28 +25,45 @@ class MyBookManager:
         super().__init__()
         self.root=root
         self.root.title("MyBook Manager")
-        # self.root.geometry("1280x800")
 
         self.center_window(1280, 800)
 
+        img_path = "assets/img/gear-icon.webp"
+        img = Image.open(img_path)
+        img = img.resize((33,33),)
+        gear_img = ImageTk.PhotoImage(img)
 
         self.author_map = {}
 
+        self.add_window = None
+
+
+        # App frames
         top_frame = tk.Frame(self.root, height=20)
-        top_frame.pack(side="top", fill="x", anchor="n", pady=(0,5))
+        top_frame.pack(side="top", fill="x", anchor="n")
+        top_frame.columnconfigure(2, weight=1)
+
+        details_frame = tk.Frame(self.root)
+        details_frame.pack(side="top", fill="x", anchor="n")
 
         center_frame = tk.Frame(self.root)
         center_frame.pack(side="top", fill="both", anchor="n")
 
-        btn = ctk.CTkButton(top_frame, text=" + ", command=self.open_add_window, height=30, width=30, corner_radius=5, border_color="blue", font=("Arial", 30))
-        btn.pack(side="left", padx=5, pady=5)
+        #############################
+        # Top frame buttons and label
+        #############################
+        add_btn = ctk.CTkButton(top_frame, text=" + ", command=self.open_add_window, height=30, width=30, corner_radius=5, border_color="blue", font=("Arial", 30))
+        add_btn.grid(row=0, column=0, padx=4, pady=5)
 
-        self.add_window = None
+        settings_btn = ctk.CTkButton(top_frame, image=gear_img, text="", command=self.open_add_window, height=30, width=30, corner_radius=5, border_color="blue", font=("Arial", 30))
+        settings_btn.grid(row=0, column=1, padx=4, pady=5)
 
-        # App label name
-        label1 = tk.Label(top_frame, text="MyBook Manager", font=("Arial", 14, "bold"), fg="lightblue")
-        label1.pack(side="right", padx=5)
+        app_label = tk.Label(top_frame, text="MyBook Manager", font=("Arial", 14, "bold"), fg="lightblue")
+        app_label.grid(row=0, column=2, sticky="e", padx=4, pady=5)
 
+        #########################
+        # Center frame components
+        #########################
         self.load_mode = tk.StringVar()
         self.load_mode.set("Default")
 
@@ -109,7 +130,7 @@ class MyBookManager:
         self.book_table.populate_table(books)
 
 
-    def on_mode_change(self, event=None):
+    def on_mode_change(self):
 
         mode = self.load_mode.get()
 
@@ -151,6 +172,7 @@ class MyBookManager:
             return
 
         self.add_window = AddDataWindow(self)
+ctk.set_appearance_mode("Dark")
 
 root = ctk.CTk()
 

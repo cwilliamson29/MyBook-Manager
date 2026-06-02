@@ -35,7 +35,8 @@ class SeriesTab(tk.Frame):
         self.author_dropdown = ctk.CTkComboBox(
             self,
             values=list(self.author_map.keys()),
-            variable=self.selected_author
+            variable=self.selected_author,
+            **self.style
         )
         self.author_dropdown.grid(row=1, column=1, sticky="w", pady=2)
 
