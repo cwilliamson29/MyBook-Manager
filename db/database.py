@@ -47,7 +47,8 @@ def create_tables():
     # Create Genre
     cursor.execute("""CREATE TABLE IF NOT EXISTS genre (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            title TEXT NOT NULL
+            title TEXT NOT NULL,
+            color_scheme TEXT
             )""")
     conn.commit()
 

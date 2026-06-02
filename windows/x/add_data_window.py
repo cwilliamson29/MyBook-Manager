@@ -9,14 +9,18 @@ from windows.book_tabs.add_series_tab import SeriesTab
 
 
 class AddDataWindow(tk.Toplevel):
-
     def __init__(self, app):
         super().__init__(app.root)
+
+        self.withdraw()
+
         self.app = app
 
-        self.title("Add Data")
-        self.geometry("500x400")
+        self.title("Add")
 
+        self.center_on_parent(app.root,500, 400)
+
+        self.deiconify()
         # =========================
         # NOTEBOOK (TABS)
         # =========================
@@ -52,7 +56,7 @@ class AddDataWindow(tk.Toplevel):
         genre_tab = GenreTab(notebook, self.app, self)
         notebook.add(genre_tab, text="Genre")
 
-        # notebook.bind('<<NotebookTabChanged>>', self.on_change())
+        self.protocol("WM_DELETE_WINDOW", self.on_close)
 
     def refresh_book_tab_authors(self):
         self.book_tab.refresh_authors()
@@ -62,3 +66,22 @@ class AddDataWindow(tk.Toplevel):
 
     def refresh_series_tab_authors(self):
         self.series_tab.refresh_authors()
+
+    def on_close(self):
+        # Reset reference in main app
+        self.app.add_window = None
+        self.destroy()
+
+    def center_on_parent(self, parent, width, height):
+        parent.update_idletasks()
+
+        parent_x = parent.winfo_x()
+        parent_y = parent.winfo_y()
+
+        parent_width = parent.winfo_width()
+        parent_height = parent.winfo_height()
+
+        x = parent_x + (parent_width - width) // 2
+        y = parent_y + (parent_height - height) // 2
+
+        self.geometry(f"{width}x{height}+{x}+{y}")

@@ -1,12 +1,10 @@
 import tkinter as tk
 from tkinter import ttk
 import customtkinter as ctk
-from windows.addSeries_Window import AddSeriesWindow
-from windows.add_author_window import AddAuthorWindow
+
 from db import database, db_get
-from windows.add_book_window import AddBookWindow
 from book_table import BookTable
-from windows.add_data_window import AddDataWindow
+from windows.x.add_data_window import AddDataWindow
 
 
 # TODO: color coding based on genre
@@ -23,7 +21,12 @@ class MyBookManager:
         super().__init__()
         self.root=root
         self.root.title("MyBook Manager")
-        self.root.geometry("1280x800")
+        # self.root.geometry("1280x800")
+
+        self.center_window(1280, 800)
+
+
+        self.author_map = {}
 
         top_frame = tk.Frame(self.root, height=20)
         top_frame.pack(side="top", fill="x", anchor="n", pady=(0,5))
@@ -31,23 +34,10 @@ class MyBookManager:
         center_frame = tk.Frame(self.root)
         center_frame.pack(side="top", fill="both", anchor="n")
 
-        # # Top frame buttons
-        # open_author_btn = tk.Button(top_frame, text="Add Author", command=self.open_add_author)
-        # open_author_btn.pack(side="left", padx=5)
-        # self.add_author_window = None
-        #
-        # open_series_btn = tk.Button(top_frame, text="Add Series", command=self.add_series_window)
-        # open_series_btn.pack(side="left", padx=5)
-        # self.addSeries_Window = None
-        #
-        # open_book_btn = tk.Button(top_frame, text="Add Book", command=self.open_add_book)
-        # open_book_btn.pack(side="left", padx=5)
-        # self.add_book_window = None
         btn = ctk.CTkButton(top_frame, text=" + ", command=self.open_add_window, height=30, width=30, corner_radius=5, border_color="blue", font=("Arial", 30))
         btn.pack(side="left", padx=5, pady=5)
-        # open_add_window = tk.Button(top_frame, text="Add", command=self.open_add_window, height=2, width=2)
-        # open_add_window.pack(side="left", padx=5)
-        self.add_book_window = None
+
+        self.add_window = None
 
         # App label name
         label1 = tk.Label(top_frame, text="MyBook Manager", font=("Arial", 14, "bold"), fg="lightblue")
@@ -93,7 +83,6 @@ class MyBookManager:
         self.book_table = BookTable(root)
         self.book_table.pack(fill="both", expand=True)
 
-        # self.load_authors_into_filter()
         self.load_books()
 
     def load_books(self):
@@ -141,43 +130,32 @@ class MyBookManager:
 
         self.author_filter["values"] = list(self.author_map.keys())
 
+    def center_window(self, width, height):
+
+        screen_width = self.root.winfo_screenwidth()
+        screen_height = self.root.winfo_screenheight()
+
+        x = (screen_width // 2) - (width // 2)
+        y = (screen_height // 2) - (height // 2)
+
+        self.root.geometry(
+            f"{width}x{height}+{x}+{y}"
+        )
     # ----------
     # Windows
     #-----------
     def open_add_window(self):
+        if self.add_window is not None and self.add_window.winfo_exists():
+            self.add_window.lift()
+            self.add_window.focus_force()
+            return
 
-        AddDataWindow(self)
-    #
-    # def add_series_window(self):
-    #     # If window already exists, bring it to front
-    #     if self.addSeries_Window is not None and self.addSeries_Window.winfo_exists():
-    #         self.addSeries_Window.lift()
-    #         self.addSeries_Window.focus_force()
-    #         return
-    #
-    #     # Create new window
-    #     self.addSeries_Window = AddSeriesWindow(self)
-    #
-    # def open_add_author(self):
-    #
-    #     if self.add_author_window is not None and self.add_author_window.winfo_exists():
-    #         self.add_author_window.lift()
-    #         self.add_author_window.focus_force()
-    #         return
-    #
-    #
-    #     self.add_author_window = AddAuthorWindow(self)
-    #
-    # def open_add_book(self):
-    #
-    #     if self.add_book_window is not None and self.add_book_window.winfo_exists():
-    #         self.add_book_window.lift()
-    #         return
-    #
-    #     self.add_book_window = AddBookWindow(self)
+        self.add_window = AddDataWindow(self)
 
 root = ctk.CTk()
+
 database.create_tables()
+
 app = MyBookManager(root)
 
 root.mainloop()

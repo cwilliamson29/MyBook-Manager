@@ -23,23 +23,27 @@ class EditBookWindow(tk.Toplevel):
         self.title_entry = tk.Entry(self, width=30)
         self.title_entry.grid(row=0, column=1, sticky="w", pady=5)
 
-        self.title_entry.insert(0, book[1])
+        self.title_entry.insert(0, book[0][1])
 
         # Published date
         tk.Label(self, text="Published Date:").grid(row=1, column=0, sticky="e",pady=5)
 
         self.date_entry = tk.Entry(self, width=10)
         self.date_entry.grid(row=1, column=1, sticky="w",pady=5)
-
-        self.date_entry.insert(0, book[6])
+        if book[0][6] is None:
+            self.date_entry.insert(0, "")
+        else:
+            self.date_entry.insert(0, book[0][6])
 
         # NLS Order
         tk.Label(self, text="NLS Order:").grid(row=2, column=0, sticky="e",pady=5)
 
         self.nls_entry = tk.Entry(self, width=20)
         self.nls_entry.grid(row=2, column=1, sticky="w",pady=5)
-
-        self.nls_entry.insert(0, book[5])
+        if book[0][6] is None:
+            self.nls_entry.insert(0, "")
+        else:
+            self.nls_entry.insert(0, book[0][5])
 
         # print(book)
 

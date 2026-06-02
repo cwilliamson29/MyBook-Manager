@@ -15,9 +15,9 @@ def add_series(data):
     db = add_to_db(sql, data)
     return db
 
-def add_genre(title):
-    sql = "INSERT INTO genre (title) VALUES (?)"
-    db = add_to_db(sql, title)
+def add_genre(data):
+    sql = "INSERT INTO genre (title, color_scheme) VALUES (?, ?)"
+    db = add_to_db(sql, data)
     return db
 
 def add_author(data):

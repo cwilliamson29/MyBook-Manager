@@ -53,6 +53,12 @@ class BookTable(tk.Frame):
 
         self.tree.tag_configure("oddrow", background="#cccccc", foreground="black")
         self.tree.tag_configure("evenrow", background="white", foreground="black")
+        #Genre Tags
+        self.genre_tags = db_get.get_genres()
+        for genre in self.genre_tags:
+            print(genre)
+            if genre[2] is not None:
+                self.tree.tag_configure(genre[1], background=genre[2], foreground="black")
 
         self.tree.bind("<Button-1>", self.on_click)
 
@@ -80,17 +86,23 @@ class BookTable(tk.Frame):
 
         # insert new rows
         for index, book in enumerate(books):
-            tag = "evenrow" if index % 2 == 0 else "oddrow"
+            tag = ""
+            genre_color_tag = db_get.get_genres_by_title(book[7])
+            print(genre_color_tag[0][2])
+            if genre_color_tag[0][2] is not None:
+                tag = genre_color_tag[0][1]
+            else:
+                tag = "evenrow" if index % 2 == 0 else "oddrow"
 
             book_id = book[0]
             title = book[1]
             series = book[2]
             book_number = book[3]
             author = f"{book[4]} {book[5]}"
-            rating = "50"
-            genre = "Sci-Fi"
-            isbn = "asdf2345asdf2"
-            nls_order = book[7]
+            rating = book[6]
+            genre = book[7]
+            isbn = book[8]
+            nls_order = book[9]
 
             if series is None:
                 series = ''
@@ -98,7 +110,7 @@ class BookTable(tk.Frame):
                 book_number = ''
             if nls_order is None:
                 nls_order = ''
-
+            print(tag)
             self.tree.insert(
                 "",
                 "end",

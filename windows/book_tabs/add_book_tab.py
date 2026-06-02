@@ -1,5 +1,7 @@
 import tkinter as tk
 import customtkinter as ctk
+from CTkColorPicker import *
+
 from db import db_get, db_add
 
 
@@ -10,7 +12,7 @@ class AddBookTab(tk.Frame):
         self.parent = parent
 
         self.authors = db_get.get_authors()
-        self.genres = db_get.get_genres()
+        self.genres = db_get.get_genres_titles()
         self.series_map = {}
 
 
@@ -99,6 +101,7 @@ class AddBookTab(tk.Frame):
             text="Add Book",
             command=self.add_book
         ).grid(row=9, column=1, pady=2)
+
 
 
     def author_selected(self, *args):
@@ -206,7 +209,7 @@ class AddBookTab(tk.Frame):
         self.author_dropdown.configure(values=list(self.author_map.keys()))
 
     def refresh_genres(self):
-        self.genres = db_get.get_genres()
+        self.genres = db_get.get_genres_titles()
         genre = {
             f"{title}": genre_id
             for genre_id, title in self.genres
