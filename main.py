@@ -6,6 +6,7 @@ from PIL import Image, ImageTk
 
 from db import database, db_get
 from book_table import BookTable
+from details_frame import DetailsFrame
 from windows.x.add_data_window import AddDataWindow
 
 
@@ -43,8 +44,8 @@ class MyBookManager:
         top_frame.pack(side="top", fill="x", anchor="n")
         top_frame.columnconfigure(2, weight=1)
 
-        details_frame = tk.Frame(self.root)
-        details_frame.pack(side="top", fill="x", anchor="n")
+        details_framed = tk.Frame(self.root)
+        details_framed.pack(side="top", fill="x", anchor="n")
 
         center_frame = tk.Frame(self.root)
         center_frame.pack(side="top", fill="both", anchor="n")
@@ -60,6 +61,10 @@ class MyBookManager:
 
         app_label = tk.Label(top_frame, text="MyBook Manager", font=("Arial", 14, "bold"), fg="lightblue")
         app_label.grid(row=0, column=2, sticky="e", padx=4, pady=5)
+
+        # self.book_id = tk.StringVar()
+        self.details = DetailsFrame(details_framed)
+        self.details.pack_forget()
 
         #########################
         # Center frame components
@@ -101,7 +106,7 @@ class MyBookManager:
         # TABLE
         # =========================
 
-        self.book_table = BookTable(root)
+        self.book_table = BookTable(self.root, self)
         self.book_table.pack(fill="both", expand=True)
 
         self.load_books()
@@ -172,6 +177,13 @@ class MyBookManager:
             return
 
         self.add_window = AddDataWindow(self)
+
+    def show_book_details(self, book_id):
+        self.details.pack(side="top", fill="x", anchor="n")
+        # book = get_book_details(book_id)
+        print("here")
+        self.details.load_book(book_id)
+
 ctk.set_appearance_mode("Dark")
 
 root = ctk.CTk()

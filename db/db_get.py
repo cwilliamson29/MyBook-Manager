@@ -99,7 +99,30 @@ def get_books_by_author(author_id):
     return get_from_db(sql, (author_id,))
 
 def get_book_by_id(book_id):
-    sql = "SELECT * FROM books WHERE id = ?"
+    sql = ("""SELECT
+            books.id,
+            books.title,
+            series.title,
+            books.num_in_series,
+            authors.first_name,
+            authors.last_name,
+            books.rating,
+            genre.title,
+            books.isbn,
+            books.nls_order
+        FROM books
+        LEFT JOIN series
+            ON books.series_id = series.id
+        LEFT JOIN authors
+            ON books.author_id = authors.id
+        LEFT JOIN genre
+            ON books.genre_id = genre.id
+        WHERE books.id = ?
+        ORDER BY
+            authors.first_name,
+            authors.last_name,
+            series.title,
+            books.num_in_series""")
     row = get_from_db(sql, (book_id,))
     # print("**********************")
     # print(row)

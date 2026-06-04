@@ -6,8 +6,11 @@ from windows.edit_book_window import EditBookWindow
 
 class BookTable(tk.Frame):
 
-    def __init__(self, parent):
+    def __init__(self, parent, app):
         super().__init__(parent)
+
+        self.parent = parent
+        self.app = app
 
         # Scrollbar
         scrollbar = ttk.Scrollbar(self)
@@ -53,7 +56,8 @@ class BookTable(tk.Frame):
 
         self.genre_tags ={}
 
-        self.tree.bind("<Button-1>", self.on_click)
+        # self.tree.bind("<Button-1>", self.on_click)
+        self.tree.bind("<<TreeviewSelect>>", self.on_book_selected)
 
         self.tree.pack(fill="both", expand=True, pady=2)
 
@@ -193,3 +197,21 @@ class BookTable(tk.Frame):
         books = db_get.get_books()
 
         self.populate_table(books)
+
+    def on_book_selected(self, event):
+
+        selected = self.tree.selection()
+
+        if not selected:
+            return
+
+        book_id = int(selected[0])
+
+        # book = get_book_details(book_id)
+
+        # self.parent.book_details.load_book(book_id)
+        # self.parent.details_frame.load_book(book_id)
+        print("here: ")
+        print(hasattr(self.app, "details_frame"))
+        print(type(self.app.details))
+        self.app.show_book_details(book_id)
