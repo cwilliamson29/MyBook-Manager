@@ -44,11 +44,13 @@ class MyBookManager:
         top_frame.pack(side="top", fill="x", anchor="n")
         top_frame.columnconfigure(2, weight=1)
 
-        details_framed = tk.Frame(self.root)
-        details_framed.pack(side="top", fill="x", anchor="n")
+        outer_details = tk.Frame(self.root)
+        outer_details.pack(side="top", fill="x", anchor="n")
+        self.details_framed = tk.Frame(self.root)
+        self.details_framed.pack(side="top", fill="x", anchor="n")
 
-        center_frame = tk.Frame(self.root)
-        center_frame.pack(side="top", fill="both", anchor="n")
+        self.center_frame = tk.Frame(self.root)
+        self.center_frame.pack(side="top", fill="both", anchor="n")
 
         #############################
         # Top frame buttons and label
@@ -63,7 +65,7 @@ class MyBookManager:
         app_label.grid(row=0, column=2, sticky="e", padx=4, pady=5)
 
         # self.book_id = tk.StringVar()
-        self.details = DetailsFrame(details_framed)
+        self.details = DetailsFrame(self.details_framed, self)
         self.details.pack_forget()
 
         #########################
@@ -72,10 +74,10 @@ class MyBookManager:
         self.load_mode = tk.StringVar()
         self.load_mode.set("Default")
 
-        tk.Label(center_frame, text="Filter:").grid(row=0, column=0)
+        tk.Label(self.center_frame, text="Filter:").grid(row=0, column=0)
 
         mode_dropdown = ttk.Combobox(
-            center_frame,
+            self.center_frame,
             textvariable=self.load_mode,
             values=["Default", "By Author"],
             state="readonly",
@@ -88,7 +90,7 @@ class MyBookManager:
         self.author_filter_var = tk.StringVar()
 
         self.author_filter = ttk.Combobox(
-            center_frame,
+            self.center_frame,
             textvariable=self.author_filter_var,
             state="readonly"
         )
@@ -97,7 +99,7 @@ class MyBookManager:
         self.author_filter.grid_forget()  # hidden initially
 
         tk.Button(
-            center_frame,
+            self.center_frame,
             text="Load Books",
             command=self.load_books
         ).grid(row=0, column=1000)
@@ -179,10 +181,14 @@ class MyBookManager:
         self.add_window = AddDataWindow(self)
 
     def show_book_details(self, book_id):
+        self.details_framed.pack(side="top", fill="x", anchor="n", before=self.center_frame)
         self.details.pack(side="top", fill="x", anchor="n")
         # book = get_book_details(book_id)
-        print("here")
         self.details.load_book(book_id)
+
+    def close_book(self):
+        self.details_framed.pack_forget()
+        self.details.pack_forget()
 
 ctk.set_appearance_mode("Dark")
 
