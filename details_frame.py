@@ -6,6 +6,7 @@ from io import BytesIO
 from PIL import ImageTk
 
 from db import db_get
+from details_edit_pane import DetailsEditPane
 from details_view_pane import DetailsViewPane
 
 
@@ -15,6 +16,10 @@ class DetailsFrame(ctk.CTkFrame):
         super().__init__(parent)
         self.parent = parent
         self.app = app
+
+        self.details_pane = None
+
+        self.book_id = 1
 
         self.grid_columnconfigure(3, weight=1)
 
@@ -45,17 +50,16 @@ class DetailsFrame(ctk.CTkFrame):
         ctk.CTkLabel(left_frame, image=ctk_img).grid(row=0, column=0, sticky="w", padx=5, pady=2)
 
         # Center frame options bar
-        edit_btn = ctk.CTkButton(center_frame_bar, text="EDIT", width=50)
+        edit_btn = ctk.CTkButton(center_frame_bar, text="EDIT", width=50, command=lambda : self.edit_book(self.book_id))
         edit_btn.grid(row=0, column=0, sticky="w", padx=5, pady=2)
 
         close_btn = ctk.CTkButton(center_frame_bar, image=close_img_display, text=None, width=20, fg_color="transparent", command=self.app.close_book)
         close_btn.image = close_img_display
         close_btn.grid(row=0, column=1, sticky="e", padx=5, pady=2)
 
-        self.details_pane = None
-
     def load_book(self, book_id):
         book = db_get.get_book_by_id(book_id)
+        self.book_id = book_id
 
         if self.details_pane is not None:
             self.details_pane.destroy()
@@ -63,6 +67,15 @@ class DetailsFrame(ctk.CTkFrame):
         self.details_pane = DetailsViewPane(self.center_frame_details, book[0])
         self.details_pane.pack(side="top", anchor="n", fill="x", expand=True)
 
+    def edit_book(self, book_id):
+        book = db_get.get_book_by_id(book_id)
+        print("book id: {self.book_id}")
+        if self.details_pane is not None:
+            self.details_pane.destroy()
+
+        print(book)
+        self.details_pane = DetailsEditPane(self.center_frame_details, book[0])
+        self.details_pane.pack(side="top", anchor="n", fill="x", expand=True)
 
     def load_image_from_url(self, url):
         """Fetches image from URL and returns a PIL Image object."""

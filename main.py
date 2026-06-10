@@ -190,6 +190,7 @@ class MyBookManager:
         self.details_framed.pack_forget()
         self.details.pack_forget()
 
+
 ctk.set_appearance_mode("Dark")
 
 root = ctk.CTk()
