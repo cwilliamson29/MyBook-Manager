@@ -22,6 +22,7 @@ def create_tables():
         isbn TEXT,
         genre_id INTEGER NOT NULL,
         author_id INTEGER NOT NULL,
+        description TEXT,
         FOREIGN KEY(author_id) REFERENCES authors(id),
         FOREIGN KEY(series_id) REFERENCES series(id)
         FOREIGN KEY(genre_id) REFERENCES genre(id)

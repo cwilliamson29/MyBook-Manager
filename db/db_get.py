@@ -109,7 +109,8 @@ def get_book_by_id(book_id):
             books.rating,
             genre.title,
             books.isbn,
-            books.nls_order
+            books.nls_order,
+            description
         FROM books
         LEFT JOIN series
             ON books.series_id = series.id
