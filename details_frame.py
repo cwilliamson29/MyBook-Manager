@@ -45,7 +45,7 @@ class DetailsFrame(ctk.CTkFrame):
 
         imgurl = "https://imgs.search.brave.com/1o7gEYxi0RYNcwVdUp-a8-XrKWyN8K95j1aquBuXgHs/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9jZG4u/aWNvbnNjb3V0LmNv/bS9pY29uL3ByZW1p/dW0vcG5nLTI1Ni10/aHVtYi9waWN0dXJl/LWljb24tc3ZnLWRv/d25sb2FkLXBuZy0x/MTYxOTAwOS5wbmc_/Zj13ZWJwJnc9MTI4"
         img = self.load_image_from_url(imgurl)
-        ctk_img = ctk.CTkImage(img, img, (200,200))
+        ctk_img = ctk.CTkImage(img, img, (225,225))
 
         ctk.CTkLabel(left_frame, image=ctk_img).grid(row=0, column=0, sticky="w", padx=5, pady=2)
 

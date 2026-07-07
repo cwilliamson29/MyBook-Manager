@@ -55,47 +55,47 @@ class DetailsViewPane(ctk.CTkFrame):
         # Author
         ctk.CTkLabel(col1, text="Author:").grid(row=1, column=0, sticky="w", padx=padx, pady=pady)
 
-        self.author_value = ctk.CTkLabel(col1, text=self.book[4] + " " + self.book[5])
+        self.author_value = ctk.CTkLabel(col1, text=self.book[6] + " " + self.book[7])
         self.author_value.grid(row=1, column=1, sticky="w", padx=padx, pady=pady)
 
         # Series
         ctk.CTkLabel(col1, text="Series:").grid(row=2, column=0, sticky="w", padx=padx, pady=pady)
 
-        self.series_value = ctk.CTkLabel(col1, text=self.book[2])
+        self.series_value = ctk.CTkLabel(col1, text=self.book[3])
         self.series_value.grid(row=2, column=1, sticky="w", padx=padx, pady=pady)
 
         # Book number
         ctk.CTkLabel(col1, text="Book #:").grid(row=3, column=0, sticky="w", padx=padx, pady=pady)
 
-        self.book_num = ctk.CTkLabel(col1, text=self.book[3])
+        self.book_num = ctk.CTkLabel(col1, text=self.book[4])
         self.book_num.grid(row=3, column=1, sticky="w", padx=padx, pady=pady)
 
         # Genre
         ctk.CTkLabel(col1, text="Genre:").grid(row=4, column=0, sticky="w", padx=padx, pady=pady)
 
-        self.genre = ctk.CTkLabel(col1, text=self.book[7])
+        self.genre = ctk.CTkLabel(col1, text=self.book[9])
         self.genre.grid(row=4, column=1, sticky="w", padx=padx, pady=pady)
 
         # ISBN
         ctk.CTkLabel(col1, text="ISBN:").grid(row=5, column=0, sticky="w", padx=padx, pady=pady)
 
-        self.isbn_value = ctk.CTkLabel(col1, text=self.book[8])
+        self.isbn_value = ctk.CTkLabel(col1, text=self.book[10])
         self.isbn_value.grid(row=5, column=1, sticky="w", padx=padx, pady=pady)
 
         # Rating
         ctk.CTkLabel(col2, text="Rating:").grid(row=0, column=0, sticky="w", padx=padx, pady=pady)
 
-        self.isbn_value = ctk.CTkLabel(col2, text=self.book[6])
+        self.isbn_value = ctk.CTkLabel(col2, text=self.book[8])
         self.isbn_value.grid(row=0, column=1, sticky="w", padx=padx, pady=pady)
 
         # NLS ORder
         ctk.CTkLabel(col2, text="NLS Order:").grid(row=1, column=0, sticky="w", padx=padx, pady=pady)
 
-        self.isbn_value = ctk.CTkLabel(col2, text=self.book[9])
+        self.isbn_value = ctk.CTkLabel(col2, text=self.book[11])
         self.isbn_value.grid(row=1, column=1, sticky="w", padx=padx, pady=pady)
 
         # Description
         ctk.CTkLabel(col2, text="Description:").grid(row=2, column=0, sticky="w", padx=padx, pady=pady)
 
-        self.isbn_value = ctk.CTkLabel(col2, text=self.book[10])
+        self.isbn_value = ctk.CTkLabel(col2, text=self.book[1])
         self.isbn_value.grid(row=2, column=1, sticky="w", padx=padx, pady=pady)

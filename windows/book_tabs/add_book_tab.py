@@ -16,7 +16,7 @@ class AddBookTab(tk.Frame):
         self.series_map = {}
 
         self.style = {
-            "width": 200,
+            "width": 250,
             "border_color": "gray40"
         }
 
@@ -66,7 +66,7 @@ class AddBookTab(tk.Frame):
         self.num_in_series.grid_forget()
 
         # Rating
-        tk.Label(self, text="Rating").grid(row=4, column=0, sticky="e", pady=2)
+        tk.Label(self, text="Rating:").grid(row=4, column=0, sticky="e", pady=2)
         self.rating_entry = ctk.CTkEntry(self, **self.style)
         self.rating_entry.grid(row=4, column=1, sticky="w", pady=2)
 

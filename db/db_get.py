@@ -102,8 +102,10 @@ def get_book_by_id(book_id):
     sql = ("""SELECT
             books.id,
             books.title,
+            series.id,
             series.title,
             books.num_in_series,
+            authors.id,
             authors.first_name,
             authors.last_name,
             books.rating,
