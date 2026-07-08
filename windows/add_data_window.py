@@ -18,7 +18,7 @@ class AddDataWindow(tk.Toplevel):
 
         self.title("Add")
 
-        self.center_on_parent(app.root,500, 400)
+        self.center_on_parent(app.root,500, 480)
 
         self.deiconify()
         # =========================

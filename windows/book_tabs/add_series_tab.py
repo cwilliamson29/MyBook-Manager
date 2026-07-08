@@ -13,17 +13,18 @@ class SeriesTab(tk.Frame):
 
         self.style = {
             "width": 200,
-            "border_color": "gray40"
+            "border_color": "gray40",
+            "border_width": 1,
         }
 
-        tk.Label(self, text="Title").grid(row=0, column=0, sticky="e", pady=2)
+        tk.Label(self, text="Title:").grid(row=0, column=0, sticky="e", pady=2)
         self.title = ctk.CTkEntry(self, **self.style)
         self.title.grid(row=0, column=1, sticky="w", pady=2)
 
         # Load authors
         self.authors = db_get.get_authors()
 
-        tk.Label(self, text="Select Author").grid(row=1, column=0, sticky="e", pady=2)
+        tk.Label(self, text="Select Author:").grid(row=1, column=0, sticky="e", pady=2)
 
         self.selected_author = tk.StringVar()
 

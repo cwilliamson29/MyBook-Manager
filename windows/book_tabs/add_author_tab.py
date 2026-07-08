@@ -13,13 +13,14 @@ class AuthorTab(tk.Frame):
         self.window = window
         self.style = {
             "width": 200,
-            "border_color": "gray40"
+            "border_color": "gray40",
+            "border_width": 1,
         }
-        tk.Label(self, text="First Name").grid(row=0, column=0, sticky="e", pady=2)
+        tk.Label(self, text="First Name:").grid(row=0, column=0, sticky="e", pady=2)
         self.first = ctk.CTkEntry(self, **self.style)
         self.first.grid(row=0, column=1, sticky="w", pady=2)
 
-        tk.Label(self, text="Last Name").grid(row=1, column=0, sticky="e", pady=2)
+        tk.Label(self, text="Last Name:").grid(row=1, column=0, sticky="e", pady=2)
         self.last = ctk.CTkEntry(self, **self.style)
         self.last.grid(row=1, column=1, sticky="w", pady=2)
 

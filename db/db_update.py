@@ -4,22 +4,36 @@ from db.config import DB_NAME
 def get_connection():
     return sqlite3.connect(DB_NAME)
 
-def update_book(book_id, title,pub_date,nls_order):
-
+def add_to_db(sql, args):
     conn = get_connection()
-    cur = conn.cursor()
+    cursor = conn.cursor()
+    try:
+        cursor.execute(sql, args)
+        conn.commit()
+        return "success"
+    except sqlite3.Error as e:
+        print("SQLite error: ", e)
+        return e
+    finally:
+        conn.close()
 
-    cur.execute("""
+def update_book(data):
+    sql ="""
         UPDATE books
         SET
             title = ?,
-            published_date = ?,
-            nls_order = ?
+            author_id = ?,
+            series_id = ?,
+            num_in_series = ?,
+            rating = ?,
+            genre_id = ?,
+            isbn = ?,
+            nls_order = ?,
+            description = ?
         WHERE id = ?
-    """, (title, pub_date, nls_order, book_id,))
-
-    conn.commit()
-    conn.close()
+    """
+    db = add_to_db(sql, data)
+    return db
 
 def delete_book(book_id):
 

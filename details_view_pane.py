@@ -16,21 +16,22 @@ class DetailsViewPane(ctk.CTkFrame):
         self.app = app
         self.book = data
 
-        #### Print book for positions
-        print(self.book)
-
-        bar = ctk.CTkFrame(self, border_color="blue", border_width=1)
+        # bar = ctk.CTkFrame(self, border_color="blue", border_width=1)
+        bar = ctk.CTkFrame(self, fg_color="gray20")
         bar.pack(side="top", anchor="n", fill="x", expand=True)
         bar.columnconfigure(1, weight=1)
 
-        details = ctk.CTkFrame(self, border_color="red", border_width=1)
+        # details = ctk.CTkFrame(self, border_color="red", border_width=1)
+        details = ctk.CTkFrame(self, fg_color="gray20")
         details.pack(side="top", anchor="n", fill="x", expand=True)
         details.columnconfigure(0, weight=1, uniform="group1")
         details.columnconfigure(1, weight=1, uniform="group1")
 
-        col1 = ctk.CTkFrame(details, border_color="blue", border_width=1)
+        # col1 = ctk.CTkFrame(details, border_color="blue", border_width=1)
+        col1 = ctk.CTkFrame(details, fg_color="gray20")
         col1.grid(row=0, column=0, sticky="nsew")
-        col2 = ctk.CTkFrame(details, border_color="blue", border_width=1)
+        # col2 = ctk.CTkFrame(details, border_color="blue", border_width=1)
+        col2 = ctk.CTkFrame(details, fg_color="gray20")
         col2.grid(row=0, column=1, sticky="nsew")
 
         close_img = Image.open('assets/img/close_btn.png').convert('RGBA')
@@ -85,17 +86,17 @@ class DetailsViewPane(ctk.CTkFrame):
         # Rating
         ctk.CTkLabel(col2, text="Rating:").grid(row=0, column=0, sticky="w", padx=padx, pady=pady)
 
-        self.isbn_value = ctk.CTkLabel(col2, text=self.book[8])
-        self.isbn_value.grid(row=0, column=1, sticky="w", padx=padx, pady=pady)
+        self.rating_value = ctk.CTkLabel(col2, text=self.book[8])
+        self.rating_value.grid(row=0, column=1, sticky="w", padx=padx, pady=pady)
 
         # NLS ORder
         ctk.CTkLabel(col2, text="NLS Order:").grid(row=1, column=0, sticky="w", padx=padx, pady=pady)
 
-        self.isbn_value = ctk.CTkLabel(col2, text=self.book[11])
-        self.isbn_value.grid(row=1, column=1, sticky="w", padx=padx, pady=pady)
+        self.nls_value = ctk.CTkLabel(col2, text=self.book[11])
+        self.nls_value.grid(row=1, column=1, sticky="w", padx=padx, pady=pady)
 
         # Description
         ctk.CTkLabel(col2, text="Description:").grid(row=2, column=0, sticky="w", padx=padx, pady=pady)
 
-        self.isbn_value = ctk.CTkLabel(col2, text=self.book[1])
-        self.isbn_value.grid(row=2, column=1, sticky="w", padx=padx, pady=pady)
+        self.desc_value = ctk.CTkLabel(col2, text=self.book[12])
+        self.desc_value.grid(row=2, column=1, sticky="w", padx=padx, pady=pady)

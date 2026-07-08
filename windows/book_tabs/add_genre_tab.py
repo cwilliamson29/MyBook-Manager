@@ -13,7 +13,8 @@ class GenreTab(tk.Frame):
         self.window = window
         self.style = {
             "width": 200,
-            "border_color": "gray40"
+            "border_color": "gray40",
+            "border_width": 1,
         }
 
         tk.Label(self, text="Genre Name:").grid(row=0, column=0, sticky="e", pady=2)

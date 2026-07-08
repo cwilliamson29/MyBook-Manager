@@ -6,7 +6,7 @@ def get_connection():
     return sqlite3.connect(DB_NAME)
 
 def add_book(data):
-    sql = "INSERT INTO books (title, author_id, series_id, num_in_series, rating, genre_id, isbn, nls_order) VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
+    sql = "INSERT INTO books (title, author_id, series_id, num_in_series, rating, genre_id, isbn, nls_order, description) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)"
     db = add_to_db(sql, data)
     return db
 

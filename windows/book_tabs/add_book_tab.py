@@ -17,7 +17,8 @@ class AddBookTab(tk.Frame):
 
         self.style = {
             "width": 250,
-            "border_color": "gray40"
+            "border_color": "gray40",
+            "border_width": 1,
         }
 
         # Book Title
@@ -95,6 +96,11 @@ class AddBookTab(tk.Frame):
         self.nls_order_entry = ctk.CTkEntry(self, **self.style)
         self.nls_order_entry.grid(row=7, column=1, sticky="w", pady=2)
 
+        # Description
+        tk.Label(self, text="Description:").grid(row=8, column=0, sticky="ne", pady=2)
+        self.description_entry = ctk.CTkTextbox(self, **self.style, height=100)
+        self.description_entry.grid(row=8, column=1, sticky="w", pady=2)
+
         self.error_label = tk.Label(self, text="", fg="red")
         self.success_label = tk.Label(self, text="Book Successfully Added!", fg="green")
 
@@ -102,7 +108,7 @@ class AddBookTab(tk.Frame):
             self,
             text="Add Book",
             command=self.add_book
-        ).grid(row=9, column=1, pady=2)
+        ).grid(row=10, column=1, pady=2)
 
 
 
@@ -163,6 +169,7 @@ class AddBookTab(tk.Frame):
 
         isbn = self.isbn_entry.get().strip()
         nls = self.nls_order_entry.get().strip()
+        desc = self.description_entry.get("1.0", "end-1c").strip()
 
         if not title or not author_name or not genre:
             if not title:
@@ -184,7 +191,7 @@ class AddBookTab(tk.Frame):
 
         author_id = self.author_map[author_name]
 
-        data = (title, author_id, series_id, book_num, rating, genre_id, isbn, nls)
+        data = (title, author_id, series_id, book_num, rating, genre_id, isbn, nls, desc)
         db_attempt = db_add.add_book(data)
         if db_attempt == "success":
             self.title_entry.delete(0, tk.END)
@@ -201,11 +208,11 @@ class AddBookTab(tk.Frame):
             self.num_in_series.grid_forget()
             self.num_in_series_entry.grid_forget()
 
-            self.success_label.grid(row=8, column=1)
+            self.success_label.grid(row=9, column=1)
             self.app.load_books()
         else:
             self.error_label.config(text=f"Error: {db_attempt}!", fg="red")
-            self.error_label.grid(row=8, column=1)
+            self.error_label.grid(row=9, column=1)
 
     def refresh_authors(self):
         self.authors =  db_get.get_authors()

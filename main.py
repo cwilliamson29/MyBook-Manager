@@ -7,7 +7,7 @@ from PIL import Image, ImageTk
 from db import database, db_get
 from book_table import BookTable
 from details_frame import DetailsFrame
-from windows.x.add_data_window import AddDataWindow
+from windows.add_data_window import AddDataWindow
 
 
 # TODO: backups manual
@@ -44,9 +44,9 @@ class MyBookManager:
         top_frame.pack(side="top", fill="x", anchor="n")
         top_frame.columnconfigure(2, weight=1)
 
-        outer_details = tk.Frame(self.root)
-        outer_details.pack(side="top", fill="x", anchor="n")
-        self.details_framed = tk.Frame(self.root)
+        # outer_details = tk.Frame(self.root, background="gray20")
+        # outer_details.pack(side="top", fill="x", anchor="n")
+        self.details_framed = tk.Frame(self.root, background="gray20")
         self.details_framed.pack(side="top", fill="x", anchor="n")
 
         self.center_frame = tk.Frame(self.root)
@@ -194,6 +194,7 @@ class MyBookManager:
 ctk.set_appearance_mode("Dark")
 
 root = ctk.CTk()
+root.fg_color="gray20"
 
 database.create_tables()
 

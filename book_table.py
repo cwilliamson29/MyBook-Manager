@@ -1,7 +1,6 @@
 import tkinter as tk
 from tkinter import ttk, messagebox
 from db import db_get, db_update
-from windows.edit_book_window import EditBookWindow
 
 
 class BookTable(tk.Frame):
@@ -23,7 +22,7 @@ class BookTable(tk.Frame):
         # Treeview
         self.tree = ttk.Treeview(
             self,
-            columns=("Edit", "Delete", "Book #", "Series", "Title", "Author", "Rating", "Genre", "ISBN","NLS Order"),
+            columns=("Delete", "Book #", "Series", "Title", "Author", "Rating", "Genre", "ISBN","NLS Order"),
             show="headings",
             yscrollcommand=scrollbar.set
         )
@@ -31,7 +30,6 @@ class BookTable(tk.Frame):
         scrollbar.config(command=self.tree.yview)
 
         # Headings
-        self.tree.heading("Edit", text="Edit", anchor="center")
         self.tree.heading("Delete", text="Delete", anchor="center")
         self.tree.heading("Book #", text="Book #")
         self.tree.heading("Series", text="Series")
@@ -43,7 +41,6 @@ class BookTable(tk.Frame):
         self.tree.heading("NLS Order", text="NLS Order")
 
         # Column sizes
-        self.tree.column("Edit", width=50, stretch=False)
         self.tree.column("Delete", width=50, stretch=False)
         self.tree.column("Book #", width=50, stretch=False)
         self.tree.column("Series", width=200)
@@ -56,7 +53,7 @@ class BookTable(tk.Frame):
 
         self.genre_tags ={}
 
-        # self.tree.bind("<Button-1>", self.on_click)
+        self.tree.bind("<Button-1>", self.on_click)
         self.tree.bind("<<TreeviewSelect>>", self.on_book_selected)
 
         self.tree.pack(fill="both", expand=True, pady=2)
@@ -81,7 +78,6 @@ class BookTable(tk.Frame):
         # Genre Tags
         self.genre_tags = db_get.get_genres()
         for genre in self.genre_tags:
-            print(genre)
             if genre[2] is not None:
                 self.tree.tag_configure(genre[1], background=genre[2], foreground="black")
         # clear old rows
@@ -92,7 +88,7 @@ class BookTable(tk.Frame):
         for index, book in enumerate(books):
             tag = ""
             genre_color_tag = db_get.get_genres_by_title(book[7])
-            print(genre_color_tag[0][2])
+
             if genre_color_tag[0][2] is not None:
                 tag = genre_color_tag[0][1]
             else:
@@ -114,12 +110,12 @@ class BookTable(tk.Frame):
                 book_number = ''
             if nls_order is None:
                 nls_order = ''
-            print(tag)
+
             self.tree.insert(
                 "",
                 "end",
                 iid=str(book_id),
-                values=("✏️", "🗑️", book_number, series, title, author, rating, genre, isbn, nls_order),
+                values=("🗑️", book_number, series, title, author, rating, genre, isbn, nls_order),
                 tags=(tag,)
             )
 
@@ -150,31 +146,11 @@ class BookTable(tk.Frame):
         book_id = int(row_id)
 
         # ====================================
-        # EDIT COLUMN
-        # ====================================
-
-        if column == "#1":
-            self.edit_book(book_id)
-
-        # ====================================
         # DELETE COLUMN
         # ====================================
 
-        elif column == "#2":
+        if column == "#1":
             self.delete_book(book_id)
-
-    # ========================================
-    # EDIT BOOK
-    # ========================================
-
-    def edit_book(self, book_id):
-
-        # print(f"Edit book: {book_id}")
-
-        # Replace with your edit window
-        # Example:
-        #
-        EditBookWindow(self, book_id)
 
     # ========================================
     # DELETE BOOK
@@ -211,7 +187,7 @@ class BookTable(tk.Frame):
 
         # self.parent.book_details.load_book(book_id)
         # self.parent.details_frame.load_book(book_id)
-        print("here: ")
-        print(hasattr(self.app, "details_frame"))
-        print(type(self.app.details))
+        # print("here: ")
+        # print(hasattr(self.app, "details_frame"))
+        # print(type(self.app.details))
         self.app.show_book_details(book_id)

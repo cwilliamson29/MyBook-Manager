@@ -6,7 +6,7 @@ from io import BytesIO
 
 from PIL import ImageTk
 
-from db import db_get
+from db import db_get, db_update
 
 
 class DetailsEditPane(ctk.CTkFrame):
@@ -46,18 +46,20 @@ class DetailsEditPane(ctk.CTkFrame):
         close_img = close_img.resize((20, 20))
         close_img_display = ImageTk.PhotoImage(close_img)
 
-        self.edit_btn = ctk.CTkButton(bar, text="SAVE", width=50, command=lambda: self.par.load_book(self.book[0]))
+        self.edit_btn = ctk.CTkButton(bar, text="SAVE", width=50, fg_color="green", hover_color="darkgreen", command=lambda: self.save_book())
         self.edit_btn.grid(row=0, column=0, sticky="w", padx=5, pady=2)
+        self.cancel_btn = ctk.CTkButton(bar, text="CANCEL", width=50, fg_color="red", hover_color="darkred", command=lambda: self.par.load_book(self.book[0]))
+        self.cancel_btn.grid(row=0, column=1, sticky="w", padx=5, pady=2)
 
         close_btn = ctk.CTkButton(bar, image=close_img_display, text=None, width=20, fg_color="transparent", command=self.app.close_book)
         close_btn.image = close_img_display
-        close_btn.grid(row=0, column=1, sticky="e", padx=5, pady=2)
+        close_btn.grid(row=0, column=2, sticky="e", padx=5, pady=2)
 
         # Title
         ctk.CTkLabel(col1, text="Title:").grid(row=0, column=0, sticky="e", **self.pad)
-        title_entry = ctk.CTkEntry(col1, **self.style)
-        title_entry.grid(row=0, column=1, sticky="w", **self.pad)
-        title_entry.insert(0, self.book[1])
+        self.title_entry = ctk.CTkEntry(col1, **self.style)
+        self.title_entry.grid(row=0, column=1, sticky="w", **self.pad)
+        self.title_entry.insert(0, self.book[1])
 
         # Author
         ctk.CTkLabel(col1, text="Author:").grid(row=1, column=0, sticky="e", **self.pad)
@@ -118,9 +120,9 @@ class DetailsEditPane(ctk.CTkFrame):
 
         # Book number
         ctk.CTkLabel(col1, text="Book #:").grid(row=3, column=0, sticky="e", **self.pad)
-        book_num_entry = ctk.CTkEntry(col1, **self.style)
-        book_num_entry.grid(row=3, column=1, sticky="w", **self.pad)
-        book_num_entry.insert(0, self.book[4])
+        self.book_num_entry = ctk.CTkEntry(col1, **self.style)
+        self.book_num_entry.grid(row=3, column=1, sticky="w", **self.pad)
+        self.book_num_entry.insert(0, self.book[4])
 
         # Genre
         self.genres = db_get.get_genres_titles()
@@ -199,3 +201,36 @@ class DetailsEditPane(ctk.CTkFrame):
         # Set default value
         if series:
             self.selected_series.set(series[0][1])
+
+    def save_book(self, *args):
+        book_id = self.book[0]
+        title = self.title_entry.get().strip()
+        author_name = self.selected_author.get()
+        series = self.selected_series.get()
+
+        if not series:
+            series_id = None
+        else:
+            series_id = self.series_map[series]
+
+        book_num = self.book_num_entry.get().strip()
+        rating = self.rating_entry.get().strip()
+        genre = self.selected_genre.get()
+
+        if not genre:
+            genre_id = None
+        else:
+            genre_id = self.genre_map[genre]
+
+        isbn = self.isbn_entry.get().strip()
+        nls = self.nls_order_entry.get().strip()
+        desc = self.description_entry.get("1.0", "end-1c").strip()
+
+        author_id = self.author_map[author_name]
+
+        data = (title, author_id, series_id, book_num, rating, genre_id, isbn, nls, desc, book_id)
+        db_attempt = db_update.update_book(data)
+        if db_attempt == "success":
+            print("success")
+        else:
+            print('failed')
