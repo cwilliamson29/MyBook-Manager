@@ -3,6 +3,7 @@ import customtkinter as ctk
 from CTkColorPicker import *
 
 from db import db_get, db_add
+from windows.book_tabs.helpers.topics_scrollable import TopicsFrame
 
 
 class AddBookTab(tk.Frame):
@@ -13,6 +14,7 @@ class AddBookTab(tk.Frame):
 
         self.authors = db_get.get_authors()
         self.genres = db_get.get_genres_titles()
+        self.topics = db_get.get_topics()
         self.series_map = {}
 
         self.style = {
@@ -21,6 +23,8 @@ class AddBookTab(tk.Frame):
             "border_width": 1,
         }
 
+        self.grid_columnconfigure(0, weight=1)
+        self.grid_columnconfigure(1, weight=1)
         # Book Title
         tk.Label(self, text="Book Title:").grid(row=0, column=0, sticky="e")
         self.title_entry = ctk.CTkEntry(self, **self.style)
@@ -96,10 +100,21 @@ class AddBookTab(tk.Frame):
         self.nls_order_entry = ctk.CTkEntry(self, **self.style)
         self.nls_order_entry.grid(row=7, column=1, sticky="w", pady=2)
 
+        # Topics
+        tk.Label(self, text="Topics:").grid(row=8, column=0, sticky="ne", pady=2)
+        self.topics_frame = TopicsFrame(self, self.topics)
+        self.topics_frame.grid(row=8, column=1, sticky="w", pady=2)
+        self.topics_frame.configure(height=50)
+
+        print(self.topics_frame.winfo_reqheight())
+        self.after(
+            100,
+            lambda: print(self.topics_frame.winfo_height())
+        )
         # Description
-        tk.Label(self, text="Description:").grid(row=8, column=0, sticky="ne", pady=2)
+        tk.Label(self, text="Description:").grid(row=9, column=0, sticky="ne", pady=2)
         self.description_entry = ctk.CTkTextbox(self, **self.style, height=100)
-        self.description_entry.grid(row=8, column=1, sticky="w", pady=2)
+        self.description_entry.grid(row=9, column=1, sticky="w", pady=2)
 
         self.error_label = tk.Label(self, text="", fg="red")
         self.success_label = tk.Label(self, text="Book Successfully Added!", fg="green")
@@ -108,7 +123,7 @@ class AddBookTab(tk.Frame):
             self,
             text="Add Book",
             command=self.add_book
-        ).grid(row=10, column=1, pady=2)
+        ).grid(row=11, column=1, pady=2)
 
 
 

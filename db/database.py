@@ -53,4 +53,20 @@ def create_tables():
             )""")
     conn.commit()
 
+    # Create topics
+    cursor.execute("""CREATE TABLE IF NOT EXISTS topics (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT NOT NULL
+            )""")
+    conn.commit()
+
+    # Book topics
+    cursor.execute("""CREATE TABLE IF NOT EXISTS book_topics (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            book_id INTEGER NOT NULL,
+            topic_id INTEGER NOT NULL,
+            FOREIGN KEY(book_id) REFERENCES books(id),
+            FOREIGN KEY(topic_id) REFERENCES topics(id)
+            )""")
+
     conn.close()

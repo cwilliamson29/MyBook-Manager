@@ -17,6 +17,9 @@ class GenreTab(tk.Frame):
             "border_width": 1,
         }
 
+        self.grid_columnconfigure(0, weight=1)
+        self.grid_columnconfigure(1, weight=1)
+
         tk.Label(self, text="Genre Name:").grid(row=0, column=0, sticky="e", pady=2)
         self.genre = ctk.CTkEntry(self, **self.style)
         self.genre.grid(row=0, column=1, sticky="w", pady=2)

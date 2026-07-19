@@ -24,9 +24,11 @@ def get_authors():
 def get_genres():
     sql = "SELECT id, title, color_scheme FROM genre ORDER BY title"
     return get_from_db(sql, None)
+
 def get_genres_titles():
     sql = "SELECT id, title FROM genre ORDER BY title"
     return get_from_db(sql, None)
+
 def get_genres_by_title(title):
     sql = "SELECT * FROM genre WHERE title = ?"
     return get_from_db(sql, (title,))
@@ -35,6 +37,9 @@ def get_series_by_author(author_id):
     sql = "SELECT id, title FROM series WHERE author_id = ?"
     return get_from_db(sql, (author_id,))
 
+def get_topics():
+    sql = "SELECT id, name FROM topics ORDER BY name"
+    return get_from_db(sql, None)
 
 def get_books():
     sql = """

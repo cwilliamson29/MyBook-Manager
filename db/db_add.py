@@ -25,6 +25,11 @@ def add_author(data):
     db = add_to_db(sql, data)
     return db
 
+def add_topic(data):
+    sql = "INSERT INTO topics (name) VALUES (?)"
+    db = add_to_db(sql, data)
+    return db
+
 def add_to_db(sql, args):
     conn = get_connection()
     cursor = conn.cursor()

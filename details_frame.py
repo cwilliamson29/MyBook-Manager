@@ -27,10 +27,6 @@ class DetailsFrame(ctk.CTkFrame):
         left_frame = ctk.CTkFrame(self, width=200, fg_color="gray20")
         left_frame.pack(side="left", expand=False)
 
-        # center_frame = ctk.CTkFrame(self, border_color="blue", border_width=1)
-        # center_frame = ctk.CTkFrame(self)
-        # center_frame.pack(side="left", anchor="n", fill="x", expand=True)
-
         # self.center_frame_details = ctk.CTkFrame(self, border_color="blue", border_width=1)
         self.center_frame_details = ctk.CTkFrame(self, fg_color="gray20")
         self.center_frame_details.pack(side="left", anchor="n", fill="x", expand=True)

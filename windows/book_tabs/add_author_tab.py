@@ -3,9 +3,7 @@ import customtkinter as ctk
 
 from db import db_add
 
-
 class AuthorTab(tk.Frame):
-
     def __init__(self, parent, app, window):
         super().__init__(parent)
 
@@ -16,6 +14,10 @@ class AuthorTab(tk.Frame):
             "border_color": "gray40",
             "border_width": 1,
         }
+
+        self.grid_columnconfigure(0, weight=1)
+        self.grid_columnconfigure(1, weight=1)
+
         tk.Label(self, text="First Name:").grid(row=0, column=0, sticky="e", pady=2)
         self.first = ctk.CTkEntry(self, **self.style)
         self.first.grid(row=0, column=1, sticky="w", pady=2)

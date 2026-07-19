@@ -12,13 +12,11 @@ from windows.add_data_window import AddDataWindow
 
 # TODO: backups manual
 # TODO: Settings Window
-# TODO: description/review
 # TODO: mp3 playback
 # TODO: Menu bar
-# TODO: row separators - not possible
 # TODO: research print function
 # TODO: research  built in mp3 player
-# TODO: xbox 360 games
+# TODO: Topics/categries
 
 class MyBookManager:
 

@@ -1,14 +1,17 @@
 import tkinter as tk
 from tkinter import ttk
+import customtkinter as ctk
+
 
 from db import db_add, db_get
 from windows.book_tabs.add_author_tab import AuthorTab
 from windows.book_tabs.add_book_tab import AddBookTab
 from windows.book_tabs.add_genre_tab import GenreTab
 from windows.book_tabs.add_series_tab import SeriesTab
+from windows.book_tabs.add_topic_tab import TopicsTab
 
 
-class AddDataWindow(tk.Toplevel):
+class AddDataWindow(ctk.CTkToplevel):
     def __init__(self, app):
         super().__init__(app.root)
 
@@ -18,7 +21,7 @@ class AddDataWindow(tk.Toplevel):
 
         self.title("Add")
 
-        self.center_on_parent(app.root,500, 480)
+        self.center_on_parent(app.root,500, 680)
 
         self.deiconify()
         # =========================
@@ -55,6 +58,13 @@ class AddDataWindow(tk.Toplevel):
 
         genre_tab = GenreTab(notebook, self.app, self)
         notebook.add(genre_tab, text="Genre")
+
+        # =========================
+        # Topics TAB
+        # =========================
+
+        topics_tab = TopicsTab(notebook, self.app, self)
+        notebook.add(topics_tab, text="Topics")
 
         self.protocol("WM_DELETE_WINDOW", self.on_close)
 
