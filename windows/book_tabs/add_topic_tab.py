@@ -18,6 +18,10 @@ class TopicsTab(tk.Frame):
             "border_width": 1,
         }
 
+        self.grid_columnconfigure(0, weight=1)
+        self.grid_columnconfigure(1, weight=0)
+        self.grid_columnconfigure(2, weight=1)
+
         tk.Label(self, text="Name:").grid(row=0, column=0, sticky="e", pady=2)
         self.name = ctk.CTkEntry(self, **self.style)
         self.name.grid(row=0, column=1, sticky="w", pady=2)

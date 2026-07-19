@@ -17,6 +17,10 @@ class SeriesTab(tk.Frame):
             "border_width": 1,
         }
 
+        self.grid_columnconfigure(0, weight=1)
+        self.grid_columnconfigure(1, weight=0)
+        self.grid_columnconfigure(2, weight=1)
+
         tk.Label(self, text="Title:").grid(row=0, column=0, sticky="e", pady=2)
         self.title = ctk.CTkEntry(self, **self.style)
         self.title.grid(row=0, column=1, sticky="w", pady=2)

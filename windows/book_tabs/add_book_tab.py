@@ -24,7 +24,9 @@ class AddBookTab(tk.Frame):
         }
 
         self.grid_columnconfigure(0, weight=1)
-        self.grid_columnconfigure(1, weight=1)
+        self.grid_columnconfigure(1, weight=0)
+        self.grid_columnconfigure(2, weight=1)
+
         # Book Title
         tk.Label(self, text="Book Title:").grid(row=0, column=0, sticky="e")
         self.title_entry = ctk.CTkEntry(self, **self.style)
