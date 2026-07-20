@@ -16,8 +16,8 @@ class DetailsViewPane(ctk.CTkFrame):
         self.app = app
         self.book = data
         self.topic_ids = db_get.get_book_topics(self.book[0])
-        self.topic_names = []
-        print(self.topic_ids[0][0])
+        self.topic_names = ", ".join(self.topic_ids)
+        print(self.topic_ids)
         # for topic_id in self.topic_ids:
         #     id = topic_id[0]
         #     name = db_get.get_topic_names(id)
@@ -109,7 +109,8 @@ class DetailsViewPane(ctk.CTkFrame):
         # Topics
         ctk.CTkLabel(col2, text="Topics:").grid(row=2, column=0, sticky="w", padx=padx, pady=pady)
         self.topics_value = ctk.CTkLabel(col2, text=self.topic_names)
-        print(self.topic_names)
+        self.topics_value.grid(row=2, column=1, sticky="w", padx=padx, pady=pady)
+        print(type(self.topic_names))
 
         # Description
         ctk.CTkLabel(col2, text="Description:").grid(row=3, column=0, sticky="w", padx=padx, pady=pady)

@@ -16,6 +16,19 @@ def get_from_db(sql, data):
 
     return rows
 
+def get_from_db_single(sql, data):
+    conn = get_connection()
+    cur = conn.cursor()
+    if data is None:
+        cur.execute(sql)
+    else:
+        cur.execute(sql, (data))
+    rows = cur.fetchall()
+    # conn.close()
+
+    return [
+        row[0] for row in cur.fetchall()
+    ]
 def get_authors():
     sql = "SELECT id, first_name, last_name FROM authors ORDER BY first_name"
     return get_from_db(sql, None)
@@ -45,8 +58,15 @@ def get_topics():
 #     sql = "SELECT topic_id FROM book_topics WHERE book_id = ?"
 #     return get_from_db(sql, (book_id,))
 def get_book_topics(book_id):
+    conn = get_connection()
+    cur = conn.cursor()
     sql = "SELECT topics.name FROM topics JOIN book_topics ON topics.id = book_topics.topic_id WHERE book_topics.book_id = ?"
-    return get_from_db(sql, (book_id,))
+    cur.execute(sql, (book_id,))
+    return [
+        row[0]
+        for row in cur.fetchall()
+    ]
+
 def get_topic_names(topic_id):
     sql = "SELECT name FROM topics WHERE id = ?"
     return get_from_db(sql, (topic_id,))
