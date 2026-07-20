@@ -59,7 +59,7 @@ class GenreTab(tk.Frame):
             return
         data = (genre_name, genre_color)
         db_attempt = db_add.add_genre(data)
-        if db_attempt == "success":
+        if db_attempt[0] == "success":
             self.genre.delete(0, tk.END)
             self.genre.configure(**self.style)
 

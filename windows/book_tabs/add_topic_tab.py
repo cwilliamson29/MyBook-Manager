@@ -48,12 +48,12 @@ class TopicsTab(tk.Frame):
             return
         data = (topic_name,)
         db_attempt = db_add.add_topic(data)
-        if db_attempt == "success":
+        if db_attempt[0] == "success":
             self.name.delete(0, tk.END)
             self.name.configure(**self.style)
 
             self.success_label.grid(row=1, column=1)
-            self.window.refresh_book_tab_genre()
+            self.window.refresh_book_tab_topics()
         else:
             self.error_label.config(text=f"Error: {db_attempt}!", fg="red")
             self.error_label.grid(row=1, column=1)

@@ -79,7 +79,7 @@ class SeriesTab(tk.Frame):
         data = (title_get,author_id)
         db_attempt = db_add.add_series(data)
 
-        if db_attempt == "success":
+        if db_attempt[0] == "success":
             self.title.delete(0, tk.END)
             self.selected_author.set("")
             self.title.configure(**self.style)

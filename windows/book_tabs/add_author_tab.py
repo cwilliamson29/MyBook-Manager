@@ -59,7 +59,7 @@ class AuthorTab(tk.Frame):
         data = (fname, lname)
         db_attempt = db_add.add_author(data)
 
-        if db_attempt == "success":
+        if db_attempt[0] == "success":
             self.first.delete(0, tk.END)
             self.last.delete(0, tk.END)
             self.first.configure(**self.style)

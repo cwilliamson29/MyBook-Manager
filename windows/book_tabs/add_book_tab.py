@@ -106,13 +106,7 @@ class AddBookTab(tk.Frame):
         tk.Label(self, text="Topics:").grid(row=8, column=0, sticky="ne", pady=2)
         self.topics_frame = TopicsFrame(self, self.topics)
         self.topics_frame.grid(row=8, column=1, sticky="w", pady=2)
-        self.topics_frame.configure(height=50)
 
-        print(self.topics_frame.winfo_reqheight())
-        self.after(
-            100,
-            lambda: print(self.topics_frame.winfo_height())
-        )
         # Description
         tk.Label(self, text="Description:").grid(row=9, column=0, sticky="ne", pady=2)
         self.description_entry = ctk.CTkTextbox(self, **self.style, height=100)
@@ -186,8 +180,9 @@ class AddBookTab(tk.Frame):
 
         isbn = self.isbn_entry.get().strip()
         nls = self.nls_order_entry.get().strip()
+        topics = self.topics_frame.get_selected_topics()
         desc = self.description_entry.get("1.0", "end-1c").strip()
-
+        print(topics)
         if not title or not author_name or not genre:
             if not title:
                 self.title_entry.configure(border_color="red")
@@ -203,14 +198,20 @@ class AddBookTab(tk.Frame):
                 self.genre_dropdown.configure(**self.style)
 
             self.error_label.config(text="Title, author, and Genre required")
-            self.error_label.grid(row=8, column=1)
+            self.error_label.grid(row=10, column=1)
             return
 
         author_id = self.author_map[author_name]
 
         data = (title, author_id, series_id, book_num, rating, genre_id, isbn, nls, desc)
         db_attempt = db_add.add_book(data)
-        if db_attempt == "success":
+
+        if db_attempt[0] == "success":
+            if topics is not []:
+                for topics_id in topics:
+                    topics_data = (db_attempt[1],topics_id)
+                    topics_db_attempt = db_add.add_book_topics(topics_data)
+
             self.title_entry.delete(0, tk.END)
             self.num_in_series_entry.delete(0, tk.END)
             self.rating_entry.delete(0, tk.END)
@@ -219,17 +220,19 @@ class AddBookTab(tk.Frame):
             self.selected_author.set("")
             self.selected_genre.set("")
             self.selected_series.set("")
+            self.description_entry.delete("0.0", "end")
 
             self.series_dropdown.grid_forget()
             self.series_label.grid_forget()
             self.num_in_series.grid_forget()
             self.num_in_series_entry.grid_forget()
 
-            self.success_label.grid(row=9, column=1)
+            self.success_label.grid(row=10, column=1)
+            self.topics_frame.clear()
             self.app.load_books()
         else:
             self.error_label.config(text=f"Error: {db_attempt}!", fg="red")
-            self.error_label.grid(row=9, column=1)
+            self.error_label.grid(row=10, column=1)
 
     def refresh_authors(self):
         self.authors =  db_get.get_authors()
@@ -248,3 +251,11 @@ class AddBookTab(tk.Frame):
         }
         self.genre_map = genre
         self.genre_dropdown.configure(values=list(self.genre_map.keys()))
+
+    def refresh_topics(self):
+        self.topics_frame.grid_forget()
+        self.topics = db_get.get_topics()
+        self.topics_frame = TopicsFrame(self, self.topics)
+        self.topics_frame.grid(row=8, column=1, sticky="w", pady=2)
+
+        print(self.topics)

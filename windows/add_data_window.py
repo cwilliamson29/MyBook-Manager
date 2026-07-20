@@ -77,6 +77,9 @@ class AddDataWindow(ctk.CTkToplevel):
     def refresh_series_tab_authors(self):
         self.series_tab.refresh_authors()
 
+    def refresh_book_tab_topics(self):
+        self.book_tab.refresh_topics()
+
     def on_close(self):
         # Reset reference in main app
         self.app.add_window = None

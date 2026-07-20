@@ -30,13 +30,19 @@ def add_topic(data):
     db = add_to_db(sql, data)
     return db
 
+def add_book_topics(data):
+    sql = "INSERT INTO book_topics (book_id, topic_id) VALUES (?, ?)"
+    db = add_to_db(sql, data)
+    return db
+
 def add_to_db(sql, args):
     conn = get_connection()
     cursor = conn.cursor()
     try:
         cursor.execute(sql, args)
+        id = cursor.lastrowid
         conn.commit()
-        return "success"
+        return "success", id
     except sqlite3.Error as e:
         print("SQLite error: ", e)
         return e

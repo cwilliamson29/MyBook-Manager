@@ -26,7 +26,7 @@ class TopicsFrame(ctk.CTkScrollableFrame):
 
             self.topics_vars[topics_id] = var
 
-    def get_selected_categories(self):
+    def get_selected_topics(self):
         """Returns a list of selected category IDs."""
 
         return [
@@ -35,7 +35,7 @@ class TopicsFrame(ctk.CTkScrollableFrame):
             if var.get()
         ]
 
-    def set_selected_categories(self, selected_ids):
+    def set_selected_topics(self, selected_ids):
         """Checks the boxes whose IDs are in selected_ids."""
 
         for topics_id, var in self.topics_vars.items():

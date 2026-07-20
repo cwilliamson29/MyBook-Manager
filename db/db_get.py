@@ -41,6 +41,16 @@ def get_topics():
     sql = "SELECT id, name FROM topics ORDER BY name"
     return get_from_db(sql, None)
 
+# def get_book_topics(book_id):
+#     sql = "SELECT topic_id FROM book_topics WHERE book_id = ?"
+#     return get_from_db(sql, (book_id,))
+def get_book_topics(book_id):
+    sql = "SELECT topics.name FROM topics JOIN book_topics ON topics.id = book_topics.topic_id WHERE book_topics.book_id = ?"
+    return get_from_db(sql, (book_id,))
+def get_topic_names(topic_id):
+    sql = "SELECT name FROM topics WHERE id = ?"
+    return get_from_db(sql, (topic_id,))
+
 def get_books():
     sql = """
         SELECT
