@@ -15,18 +15,9 @@ class DetailsViewPane(ctk.CTkFrame):
         self.par = par
         self.app = app
         self.book = data
-        self.topic_ids = db_get.get_book_topics(self.book[0])
-        self.topic_names = ", ".join(self.topic_ids)
-        print(self.topic_ids)
-        # for topic_id in self.topic_ids:
-        #     id = topic_id[0]
-        #     name = db_get.get_topic_names(id)
-        #     asdf = name[0][0]
-        #     self.topic_names.append(asdf)
-        #
-        #     print(asdf)
+        self.topics = db_get.get_book_topics_names(self.book[0])
+        self.topic_names = ", ".join(self.topics)
 
-        # print(self.topic_ids)
         # bar = ctk.CTkFrame(self, border_color="blue", border_width=1)
         bar = ctk.CTkFrame(self, fg_color="gray20")
         bar.pack(side="top", anchor="n", fill="x", expand=True)
@@ -110,7 +101,6 @@ class DetailsViewPane(ctk.CTkFrame):
         ctk.CTkLabel(col2, text="Topics:").grid(row=2, column=0, sticky="w", padx=padx, pady=pady)
         self.topics_value = ctk.CTkLabel(col2, text=self.topic_names)
         self.topics_value.grid(row=2, column=1, sticky="w", padx=padx, pady=pady)
-        print(type(self.topic_names))
 
         # Description
         ctk.CTkLabel(col2, text="Description:").grid(row=3, column=0, sticky="w", padx=padx, pady=pady)

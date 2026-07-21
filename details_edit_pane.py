@@ -1,12 +1,10 @@
 import customtkinter as ctk
 # import tkinter as tk
-import requests
 import PIL.Image as Image
-from io import BytesIO
-
 from PIL import ImageTk
 
-from db import db_get, db_update
+from db import db_get, db_update, db_add
+from windows.book_tabs.helpers.topics_scrollable import TopicsFrame
 
 
 class DetailsEditPane(ctk.CTkFrame):
@@ -16,6 +14,12 @@ class DetailsEditPane(ctk.CTkFrame):
         self.par = par
         self.app = app
         self.book = data
+
+        self.authors = db_get.get_authors()
+        self.topics = db_get.get_topics()
+        series = db_get.get_series_by_author(self.book[5])
+        self.genres = db_get.get_genres_titles()
+        self.topic_ids = db_get.get_book_topics_id(self.book[0])
 
         self.style = {
             "width": 250,
@@ -41,6 +45,8 @@ class DetailsEditPane(ctk.CTkFrame):
         col1.grid(row=0, column=0, sticky="nsew")
         col2 = ctk.CTkFrame(details, border_color="blue", border_width=1)
         col2.grid(row=0, column=1, sticky="nsew")
+        col3 = ctk.CTkFrame(details, border_color="blue", border_width=1)
+        col3.grid(row=0, column=2, sticky="nsew")
 
         close_img = Image.open('assets/img/close_btn.png').convert('RGBA')
         close_img = close_img.resize((20, 20))
@@ -63,7 +69,6 @@ class DetailsEditPane(ctk.CTkFrame):
 
         # Author
         ctk.CTkLabel(col1, text="Author:").grid(row=1, column=0, sticky="e", **self.pad)
-        self.authors = db_get.get_authors()
         self.selected_author = ctk.StringVar()
         # map display name -> id
         self.author_map = {
@@ -74,11 +79,7 @@ class DetailsEditPane(ctk.CTkFrame):
             author_id: f"{first} {last}"
             for author_id, first, last in self.authors
         }
-        # self.dropdown = ctk.CTkOptionMenu(
-        #     self,
-        #     self.selected_author,
-        #     *self.author_map.keys()
-        # )
+
         dropdown = ctk.CTkComboBox(
             col1,
             variable=self.selected_author,
@@ -95,7 +96,6 @@ class DetailsEditPane(ctk.CTkFrame):
         # Series
         self.series_id = self.book[2]
         self.selected_series = ctk.StringVar()
-        series = db_get.get_series_by_author(self.book[5])
         self.series_label = ctk.CTkLabel(col1, text="Series:")
         self.series_map = {
             f"{title}": series_id
@@ -125,8 +125,6 @@ class DetailsEditPane(ctk.CTkFrame):
         self.book_num_entry.insert(0, self.book[4])
 
         # Genre
-        self.genres = db_get.get_genres_titles()
-
         ctk.CTkLabel(col1, text="Genre:").grid(row=4, column=0, sticky="e", **self.pad)
         self.selected_genre = ctk.StringVar()
         self.genre_map = {
@@ -167,7 +165,15 @@ class DetailsEditPane(ctk.CTkFrame):
         if self.book[12] is not None:
             self.description_entry.insert("0.0", self.book[12])
 
-    def author_selected(self, *args):
+        #Topics frame
+        ctk.CTkLabel(col3, text="Topics:").grid(row=0, column=0, sticky="ne", **self.pad)
+        self.topics_frame = TopicsFrame(col3, self.topics)
+        self.topics_frame.grid(row=0, column=1, sticky="w", pady=2)
+        self.topics_frame.set_selected_topics(self.topic_ids)
+        self.topics_frame.configure(width=140)
+
+
+    def author_selected(self):
 
         selected = self.selected_author.get()
 
@@ -202,7 +208,7 @@ class DetailsEditPane(ctk.CTkFrame):
         if series:
             self.selected_series.set(series[0][1])
 
-    def save_book(self, *args):
+    def save_book(self):
         book_id = self.book[0]
         title = self.title_entry.get().strip()
         author_name = self.selected_author.get()
@@ -225,12 +231,30 @@ class DetailsEditPane(ctk.CTkFrame):
         isbn = self.isbn_entry.get().strip()
         nls = self.nls_order_entry.get().strip()
         desc = self.description_entry.get("1.0", "end-1c").strip()
+        topics = self.topics_frame.get_selected_topics()
 
         author_id = self.author_map[author_name]
 
         data = (title, author_id, series_id, book_num, rating, genre_id, isbn, nls, desc, book_id)
         db_attempt = db_update.update_book(data)
         if db_attempt == "success":
-            print("success")
+            topics_remove = db_update.remove_book_topic((book_id,))
+            if topics_remove == "success":
+                if topics is not []:
+                    result = None
+                    for topics_id in topics:
+                        topics_data = (book_id, topics_id)
+                        topics_db_attempt = db_add.add_book_topics(topics_data)
+                        if topics_db_attempt == "success":
+                            result = topics_db_attempt
+                        else:
+                            result = topics_db_attempt
+                    if result[0] == "success":
+                        self.par.load_book(self.book[0])
+                    else:
+                        print(result)
+
+            else:
+                print(topics_remove)
         else:
             print('failed')

@@ -123,7 +123,7 @@ class AddBookTab(tk.Frame):
 
 
 
-    def author_selected(self, *args):
+    def author_selected(self):
 
         selected = self.selected_author.get()
 
@@ -182,7 +182,9 @@ class AddBookTab(tk.Frame):
         nls = self.nls_order_entry.get().strip()
         topics = self.topics_frame.get_selected_topics()
         desc = self.description_entry.get("1.0", "end-1c").strip()
+
         print(topics)
+
         if not title or not author_name or not genre:
             if not title:
                 self.title_entry.configure(border_color="red")

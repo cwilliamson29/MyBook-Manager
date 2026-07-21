@@ -10,7 +10,7 @@ def get_from_db(sql, data):
     if data is None:
         cur.execute(sql)
     else:
-        cur.execute(sql, (data))
+        cur.execute(sql, data)
     rows = cur.fetchall()
     conn.close()
 
@@ -22,9 +22,7 @@ def get_from_db_single(sql, data):
     if data is None:
         cur.execute(sql)
     else:
-        cur.execute(sql, (data))
-    rows = cur.fetchall()
-    # conn.close()
+        cur.execute(sql, data)
 
     return [
         row[0] for row in cur.fetchall()
@@ -54,13 +52,20 @@ def get_topics():
     sql = "SELECT id, name FROM topics ORDER BY name"
     return get_from_db(sql, None)
 
-# def get_book_topics(book_id):
-#     sql = "SELECT topic_id FROM book_topics WHERE book_id = ?"
-#     return get_from_db(sql, (book_id,))
-def get_book_topics(book_id):
+def get_book_topics_names(book_id):
     conn = get_connection()
     cur = conn.cursor()
     sql = "SELECT topics.name FROM topics JOIN book_topics ON topics.id = book_topics.topic_id WHERE book_topics.book_id = ?"
+    cur.execute(sql, (book_id,))
+    return [
+        row[0]
+        for row in cur.fetchall()
+    ]
+
+def get_book_topics_id(book_id):
+    conn = get_connection()
+    cur = conn.cursor()
+    sql = "SELECT topics.id FROM topics JOIN book_topics ON topics.id = book_topics.topic_id WHERE book_topics.book_id = ?"
     cur.execute(sql, (book_id,))
     return [
         row[0]
@@ -162,7 +167,4 @@ def get_book_by_id(book_id):
             series.title,
             books.num_in_series""")
     row = get_from_db(sql, (book_id,))
-    # print("**********************")
-    # print(row)
-    # print("**********************")
     return row

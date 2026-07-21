@@ -35,6 +35,11 @@ def update_book(data):
     db = add_to_db(sql, data)
     return db
 
+def remove_book_topic(data):
+    rem = """DELETE FROM book_topics WHERE book_id = ?"""
+    db = add_to_db(rem, data)
+    return db
+
 def delete_book(book_id):
 
     conn = get_connection()
