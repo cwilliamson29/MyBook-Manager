@@ -34,6 +34,7 @@ class MyBookManager:
 
         self.author_map = {}
         self.topic_map = {}
+        self.genre_map = {}
 
         self.add_window = None
 
@@ -78,7 +79,7 @@ class MyBookManager:
         mode_dropdown = ttk.Combobox(
             self.center_frame,
             textvariable=self.load_mode,
-            values=["Default", "By Author", "By Topic"],
+            values=["Default", "By Author", "By Genre", "By Topic", "By Genre & Topic"],
             state="readonly",
             width=15
         )
@@ -86,26 +87,34 @@ class MyBookManager:
         mode_dropdown.grid(row=0, column=3)
         mode_dropdown.bind('<<ComboboxSelected>>', self.on_mode_change)
 
+        # Author Filter
         self.author_filter_var = tk.StringVar()
-
         self.author_filter = ttk.Combobox(
             self.center_frame,
             textvariable=self.author_filter_var,
             state="readonly"
         )
         self.author_filter.grid(row=0, column=6)
-
         self.author_filter.grid_forget()  # hidden initially
 
-        self.topic_filter_var = tk.StringVar()
+        # Genre Filter
+        self.genre_filter_var = tk.StringVar()
+        self.genre_filter = ttk.Combobox(
+            self.center_frame,
+            textvariable=self.genre_filter_var,
+            state="readonly"
+        )
+        self.genre_filter.grid(row=0, column=7)
+        self.genre_filter.grid_forget()
 
+        # Topic Filter
+        self.topic_filter_var = tk.StringVar()
         self.topic_filter = ttk.Combobox(
             self.center_frame,
             textvariable=self.topic_filter_var,
             state="readonly"
         )
-        self.topic_filter.grid(row=0, column=7)
-
+        self.topic_filter.grid(row=0, column=8)
         self.topic_filter.grid_forget()
 
         tk.Button(
@@ -147,6 +156,22 @@ class MyBookManager:
                 return
             topic_id = self.topic_map[topic_name]
             books = db_get.get_books_by_topic(topic_id)
+        elif mode == "By Genre":
+            genre_name = self.genre_filter_var.get()
+            if not genre_name:
+                return
+            genre_id = self.genre_map[genre_name]
+            books = db_get.get_books_by_genre(genre_id)
+        elif mode == "By Genre & Topic":
+            genre_name = self.genre_filter_var.get()
+            topic_name = self.topic_filter_var.get()
+            if not topic_name:
+                return
+            if not genre_name:
+                return
+            genre_id = self.genre_map[genre_name]
+            topic_id = self.topic_map[topic_name]
+            books = db_get.get_books_by_topic_and_genre(topic_id, genre_id)
         else:
             books = db_get.get_books()
 
@@ -159,14 +184,27 @@ class MyBookManager:
 
         if mode == "By Author":
             self.topic_filter.grid_forget()
+            self.genre_filter.grid_forget()
 
             self.load_authors_into_filter()
             self.author_filter.grid(row=0, column=6)
         elif mode == "By Topic":
             self.author_filter.grid_forget()
+            self.genre_filter.grid_forget()
 
             self.load_topics_into_filter()
             self.topic_filter.grid(row=0, column=7)
+        elif mode == "By Genre":
+            self.author_filter.grid_forget()
+            self.topic_filter.grid_forget()
+
+            self.load_genres_into_filter()
+            self.genre_filter.grid(row=0, column=8)
+        elif mode == "By Genre & Topic":
+            self.load_genres_into_filter()
+            self.load_topics_into_filter()
+            self.topic_filter.grid(row=0, column=8)
+            self.genre_filter.grid(row=0, column=7)
         else:
             self.author_filter.grid_forget()
             self.topic_filter.grid_forget()
@@ -179,8 +217,18 @@ class MyBookManager:
             f"{first} {last}": author_id
             for author_id, first, last in authors
         }
-
+        print(self.author_map)
         self.author_filter["values"] = list(self.author_map.keys())
+
+    def load_genres_into_filter(self):
+        genres = db_get.get_genres_titles()
+        # print(genres)
+        self.genre_map = {
+            f"{title}":genre_id
+            for genre_id, title in genres
+        }
+        self.genre_filter["values"] = list(self.genre_map.keys())
+        print(self.genre_map)
 
     def load_topics_into_filter(self):
         topics = db_get.get_topics()

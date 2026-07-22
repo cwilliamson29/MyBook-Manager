@@ -169,6 +169,69 @@ def get_books_by_topic(topic_id):
     """
     return get_from_db(sql, (topic_id,))
 
+def get_books_by_genre(genre_id):
+    sql = """
+        SELECT
+            books.id,
+            books.title,
+            series.title,
+            books.num_in_series,
+            authors.first_name,
+            authors.last_name,
+            books.rating,
+            genre.title,
+            books.isbn,
+            books.nls_order
+        FROM books
+        LEFT JOIN series
+            ON books.series_id = series.id
+        LEFT JOIN authors
+            ON books.author_id = authors.id
+        LEFT JOIN genre
+            ON books.genre_id = genre.id
+        
+        WHERE books.genre_id = ?
+        ORDER BY
+            authors.first_name,
+            authors.last_name,
+            series.title,
+            books.num_in_series
+    """
+    return get_from_db(sql, (genre_id,))
+
+def get_books_by_topic_and_genre(topic_id, genre_id):
+    sql = """
+        SELECT
+            books.id,
+            books.title,
+            series.title,
+            books.num_in_series,
+            authors.first_name,
+            authors.last_name,
+            books.rating,
+            genre.title,
+            books.isbn,
+            books.nls_order
+        FROM books
+        LEFT JOIN series
+            ON books.series_id = series.id
+        LEFT JOIN authors
+            ON books.author_id = authors.id
+        LEFT JOIN genre
+            ON books.genre_id = genre.id
+        JOIN book_topics
+            ON books.id = book_topics.book_id
+        WHERE 
+            book_topics.topic_id = ?
+            AND books.genre_id = ?
+        ORDER BY
+            authors.first_name,
+            authors.last_name,
+            series.title,
+            books.num_in_series
+    """
+    return get_from_db(sql, (topic_id,genre_id,))
+
 def get_book_by_id(book_id):
     sql = ("""SELECT
             books.id,
