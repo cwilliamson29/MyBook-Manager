@@ -32,20 +32,21 @@ class DetailsEditPane(ctk.CTkFrame):
             "padx": 5
         }
 
-        bar = ctk.CTkFrame(self, border_color="blue", border_width=1)
+        bar = ctk.CTkFrame(self)
         bar.pack(side="top", anchor="n", fill="x", expand=True)
-        bar.columnconfigure(1, weight=1)
+        # bar.columnconfigure(1, weight=1)
+        bar.columnconfigure(2, weight=1)
 
         details = ctk.CTkFrame(self, border_color="red", border_width=1)
         details.pack(side="top", anchor="n", fill="x", expand=True)
         details.columnconfigure(0, weight=1, uniform="group1")
         details.columnconfigure(1, weight=1, uniform="group1")
 
-        col1 = ctk.CTkFrame(details, border_color="blue", border_width=1)
+        col1 = ctk.CTkFrame(details)
         col1.grid(row=0, column=0, sticky="nsew")
-        col2 = ctk.CTkFrame(details, border_color="blue", border_width=1)
+        col2 = ctk.CTkFrame(details)
         col2.grid(row=0, column=1, sticky="nsew")
-        col3 = ctk.CTkFrame(details, border_color="blue", border_width=1)
+        col3 = ctk.CTkFrame(details)
         col3.grid(row=0, column=2, sticky="nsew")
 
         close_img = Image.open('assets/img/close_btn.png').convert('RGBA')
@@ -56,8 +57,9 @@ class DetailsEditPane(ctk.CTkFrame):
         self.edit_btn.grid(row=0, column=0, sticky="w", padx=5, pady=2)
         self.cancel_btn = ctk.CTkButton(bar, text="CANCEL", width=50, fg_color="red", hover_color="darkred", command=lambda: self.par.load_book(self.book[0]))
         self.cancel_btn.grid(row=0, column=1, sticky="w", padx=5, pady=2)
+        self.error_msg = ctk.CTkLabel(bar, text="", text_color="red")
 
-        close_btn = ctk.CTkButton(bar, image=close_img_display, text=None, width=20, fg_color="transparent", command=self.app.close_book)
+        close_btn = ctk.CTkButton(bar, image=close_img_display, text="", width=20, fg_color="transparent", command=self.app.close_book)
         close_btn.image = close_img_display
         close_btn.grid(row=0, column=2, sticky="e", padx=5, pady=2)
 
@@ -84,13 +86,14 @@ class DetailsEditPane(ctk.CTkFrame):
             col1,
             variable=self.selected_author,
             values=list(self.author_map.keys()),
+            command=self.author_selected,
             **self.style
         )
         self.selected_author.set(
             self.author_id_map[self.book[5]]
         )
         dropdown.grid(row=1, column=1, sticky="w", **self.pad)
-        self.selected_author.trace_add("write", self.author_selected)
+        # self.selected_author.trace_add("write", self.author_selected)
 
 
         # Series
@@ -173,14 +176,14 @@ class DetailsEditPane(ctk.CTkFrame):
         self.topics_frame.configure(width=140)
 
 
-    def author_selected(self):
+    def author_selected(self, name):
 
-        selected = self.selected_author.get()
+        # selected = self.selected_author.get()
+        #
+        # if not selected:
+        #     return
 
-        if not selected:
-            return
-
-        author_id = self.author_map[selected]
+        author_id = self.author_map[name]
 
         # Get series from database
         series = db_get.get_series_by_author(author_id)
@@ -193,8 +196,10 @@ class DetailsEditPane(ctk.CTkFrame):
         self.series_dropdown.configure(values=list(self.series_map.keys()))
 
         if not self.series_map:
-            self.series_dropdown.grid_forget()
-            self.series_label.grid_forget()
+            self.selected_series.set("")
+            self.series_id = self.book[2]
+            # self.series_dropdown.grid_forget()
+            # self.series_label.grid_forget()
             # self.num_in_series.grid_forget()
             # self.num_in_series_entry.grid_forget()
         else:
@@ -241,7 +246,7 @@ class DetailsEditPane(ctk.CTkFrame):
             topics_remove = db_update.remove_book_topic((book_id,))
             if topics_remove == "success":
                 if topics is not []:
-                    result = None
+                    result = []
                     for topics_id in topics:
                         topics_data = (book_id, topics_id)
                         topics_db_attempt = db_add.add_book_topics(topics_data)
@@ -251,10 +256,16 @@ class DetailsEditPane(ctk.CTkFrame):
                             result = topics_db_attempt
                     if result[0] == "success":
                         self.par.load_book(self.book[0])
+                        self.app.load_books()
                     else:
                         print(result)
+                        self.error_msg.configure(text=f"Error: {result[0]}")
+                        self.error_msg.grid(row=0, column=2, sticky="w", padx=5, pady=2)
 
             else:
                 print(topics_remove)
+                self.error_msg.configure(text=f"Error: {topics_remove}")
+                self.error_msg.grid(row=0, column=2, sticky="w", padx=5, pady=2)
         else:
-            print('failed')
+            self.error_msg.configure(text=f"Error: {db_attempt}")
+            self.error_msg.grid(row=0, column=2, sticky="w", padx=5, pady=2)

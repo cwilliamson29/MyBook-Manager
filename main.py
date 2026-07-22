@@ -33,6 +33,7 @@ class MyBookManager:
         gear_img = ImageTk.PhotoImage(img)
 
         self.author_map = {}
+        self.topic_map = {}
 
         self.add_window = None
 
@@ -77,13 +78,13 @@ class MyBookManager:
         mode_dropdown = ttk.Combobox(
             self.center_frame,
             textvariable=self.load_mode,
-            values=["Default", "By Author"],
+            values=["Default", "By Author", "By Topic"],
             state="readonly",
             width=15
         )
 
         mode_dropdown.grid(row=0, column=3)
-        mode_dropdown.bind("<<ComboboxSelected>>", self.on_mode_change)
+        mode_dropdown.bind('<<ComboboxSelected>>', self.on_mode_change)
 
         self.author_filter_var = tk.StringVar()
 
@@ -95,6 +96,17 @@ class MyBookManager:
         self.author_filter.grid(row=0, column=6)
 
         self.author_filter.grid_forget()  # hidden initially
+
+        self.topic_filter_var = tk.StringVar()
+
+        self.topic_filter = ttk.Combobox(
+            self.center_frame,
+            textvariable=self.topic_filter_var,
+            state="readonly"
+        )
+        self.topic_filter.grid(row=0, column=7)
+
+        self.topic_filter.grid_forget()
 
         tk.Button(
             self.center_frame,
@@ -128,22 +140,36 @@ class MyBookManager:
             author_id = self.author_map[author_name]
 
             books = db_get.get_books_by_author(author_id)
+        elif mode == "By Topic":
+            topic_name = self.topic_filter_var.get()
 
+            if not topic_name:
+                return
+            topic_id = self.topic_map[topic_name]
+            books = db_get.get_books_by_topic(topic_id)
         else:
             books = db_get.get_books()
 
         self.book_table.populate_table(books)
 
 
-    def on_mode_change(self):
+    def on_mode_change(self, event=None):
 
         mode = self.load_mode.get()
 
         if mode == "By Author":
+            self.topic_filter.grid_forget()
+
             self.load_authors_into_filter()
             self.author_filter.grid(row=0, column=6)
+        elif mode == "By Topic":
+            self.author_filter.grid_forget()
+
+            self.load_topics_into_filter()
+            self.topic_filter.grid(row=0, column=7)
         else:
             self.author_filter.grid_forget()
+            self.topic_filter.grid_forget()
 
     def load_authors_into_filter(self):
 
@@ -155,6 +181,15 @@ class MyBookManager:
         }
 
         self.author_filter["values"] = list(self.author_map.keys())
+
+    def load_topics_into_filter(self):
+        topics = db_get.get_topics()
+
+        self.topic_map = {
+            f"{name}": topic_id
+            for topic_id, name in topics
+        }
+        self.topic_filter["values"] = list(self.topic_map.keys())
 
     def center_window(self, width, height):
 

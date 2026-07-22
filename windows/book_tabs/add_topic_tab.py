@@ -31,7 +31,7 @@ class TopicsTab(tk.Frame):
 
         ctk.CTkButton(
             self,
-            text="Add Genre",
+            text="Add Topic",
             command=self.add_topic
         ).grid(row=2, column=1, pady=2)
 

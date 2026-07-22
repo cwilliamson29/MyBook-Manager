@@ -15,6 +15,7 @@ class DetailsViewPane(ctk.CTkFrame):
         self.par = par
         self.app = app
         self.book = data
+
         self.topics = db_get.get_book_topics_names(self.book[0])
         self.topic_names = ", ".join(self.topics)
 

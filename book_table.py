@@ -22,7 +22,7 @@ class BookTable(tk.Frame):
         # Treeview
         self.tree = ttk.Treeview(
             self,
-            columns=("Delete", "Book #", "Series", "Title", "Author", "Rating", "Genre", "ISBN","NLS Order"),
+            columns=("Delete", "Book #", "Series", "Title", "Author", "Rating", "Genre", "Topics", "ISBN","NLS Order"),
             show="headings",
             yscrollcommand=scrollbar.set
         )
@@ -30,26 +30,28 @@ class BookTable(tk.Frame):
         scrollbar.config(command=self.tree.yview)
 
         # Headings
-        self.tree.heading("Delete", text="Delete", anchor="center")
+        self.tree.heading("Delete", text="🗑️", anchor="center")
         self.tree.heading("Book #", text="Book #")
         self.tree.heading("Series", text="Series")
         self.tree.heading("Title", text="Title")
         self.tree.heading("Author", text="Author")
         self.tree.heading("Rating", text="Rating")
         self.tree.heading("Genre", text="Genre")
+        self.tree.heading("Topics", text="Topics")
         self.tree.heading("ISBN", text="ISBN")
         self.tree.heading("NLS Order", text="NLS Order")
 
         # Column sizes
-        self.tree.column("Delete", width=50, stretch=False)
+        self.tree.column("Delete", width=26, stretch=False)
         self.tree.column("Book #", width=50, stretch=False)
-        self.tree.column("Series", width=200)
+        self.tree.column("Series", width=125)
         self.tree.column("Title", width=300)
-        self.tree.column("Author", width=150)
+        self.tree.column("Author", width=75)
         self.tree.column("Rating", width=50, stretch=False)
         self.tree.column("Genre", width=100, stretch=False)
-        self.tree.column("ISBN", width=130, stretch=False)
-        self.tree.column("NLS Order", width=150)
+        self.tree.column("Topics", width=180, stretch=False)
+        self.tree.column("ISBN", width=100, stretch=False)
+        self.tree.column("NLS Order", width=100)
 
         self.genre_tags ={}
 
@@ -86,6 +88,7 @@ class BookTable(tk.Frame):
 
         # insert new rows
         for index, book in enumerate(books):
+            topics = db_get.get_book_topics_names(book[0])
             tag = ""
             genre_color_tag = db_get.get_genres_by_title(book[7])
 
@@ -102,6 +105,12 @@ class BookTable(tk.Frame):
             rating = book[6]
             genre = book[7]
             isbn = book[8]
+            topic_names = ", ".join(topics)
+            max_length = 20
+
+            if len(topic_names) > max_length:
+                topic_names = topic_names[:max_length - 3] + "  ..."
+
             nls_order = book[9]
 
             if series is None:
@@ -115,7 +124,7 @@ class BookTable(tk.Frame):
                 "",
                 "end",
                 iid=str(book_id),
-                values=("🗑️", book_number, series, title, author, rating, genre, isbn, nls_order),
+                values=("🗑️", book_number, series, title, author, rating, genre, topic_names, isbn, nls_order),
                 tags=(tag,)
             )
 

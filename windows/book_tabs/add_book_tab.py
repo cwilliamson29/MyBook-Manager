@@ -44,11 +44,11 @@ class AddBookTab(tk.Frame):
             self,
             values=list(self.author_map.keys()),
             variable=self.selected_author,
+            command=self.author_selected,
             **self.style
         )
         self.author_dropdown.grid(row=1, column=1, sticky="w", pady=2)
         self.author_var = tk.StringVar()
-        self.selected_author.trace_add("write", self.author_selected)
 
         # Series
         self.selected_series = tk.StringVar()
@@ -123,14 +123,9 @@ class AddBookTab(tk.Frame):
 
 
 
-    def author_selected(self):
+    def author_selected(self, name):
 
-        selected = self.selected_author.get()
-
-        if not selected:
-            return
-
-        author_id = self.author_map[selected]
+        author_id = self.author_map[name]
 
         # Get series from database
         series = db_get.get_series_by_author(author_id)
@@ -157,6 +152,8 @@ class AddBookTab(tk.Frame):
         # Set default value
         if series:
             self.selected_series.set(series[0][1])
+
+        return
 
 
     def add_book(self):
