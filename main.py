@@ -8,6 +8,7 @@ from db import database, db_get
 from book_table import BookTable
 from details_frame import DetailsFrame
 from windows.add_data_window import AddDataWindow
+from windows.settings_window import SettingsWindow
 
 
 # TODO: backups manual
@@ -16,7 +17,6 @@ from windows.add_data_window import AddDataWindow
 # TODO: Menu bar
 # TODO: research print function
 # TODO: research  built in mp3 player
-# TODO: Topics/categries
 
 class MyBookManager:
 
@@ -37,6 +37,7 @@ class MyBookManager:
         self.genre_map = {}
 
         self.add_window = None
+        self.settings_window = None
 
 
         # App frames
@@ -58,7 +59,7 @@ class MyBookManager:
         add_btn = ctk.CTkButton(top_frame, text=" + ", command=self.open_add_window, height=30, width=30, corner_radius=5, border_color="blue", font=("Arial", 30))
         add_btn.grid(row=0, column=0, padx=4, pady=5)
 
-        settings_btn = ctk.CTkButton(top_frame, image=gear_img, text="", command=self.open_add_window, height=30, width=30, corner_radius=5, border_color="blue", font=("Arial", 30))
+        settings_btn = ctk.CTkButton(top_frame, image=gear_img, text="", command=self.open_settings_window, height=30, width=30, corner_radius=5, border_color="blue", font=("Arial", 30))
         settings_btn.grid(row=0, column=1, padx=4, pady=5)
 
         app_label = tk.Label(top_frame, text="MyBook Manager", font=("Arial", 14, "bold"), fg="lightblue")
@@ -260,6 +261,14 @@ class MyBookManager:
             return
 
         self.add_window = AddDataWindow(self)
+
+    def open_settings_window(self):
+        if self.settings_window is not None and self.settings_window.winfo_exists():
+            self.settings_window.lift()
+            self.settings_window.focus_force()
+            return
+
+        self.settings_window = SettingsWindow(self)
 
     def show_book_details(self, book_id):
         self.details_framed.pack(side="top", fill="x", anchor="n", before=self.center_frame)
