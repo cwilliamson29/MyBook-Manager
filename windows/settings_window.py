@@ -9,6 +9,7 @@ from tkinter import filedialog, messagebox
 from db.config import DB_NAME
 from windows.settings_helpers.backup_database import backup_database
 from windows.settings_helpers.import_database import import_database
+from windows.settings_helpers.import_excel import import_excel_workbook
 
 
 class SettingsWindow(ctk.CTkToplevel):
@@ -28,8 +29,10 @@ class SettingsWindow(ctk.CTkToplevel):
 
         backup = ctk.CTkButton(self, text="Backup DB", command=backup_database, height=30, width=30, corner_radius=5, border_color="blue", font=("Arial", 30))
         imp = ctk.CTkButton(self, text="Import DB", command=import_database, height=30, width=30, corner_radius=5, border_color="blue", font=("Arial", 30))
+        imp_excel = ctk.CTkButton(self, text="Import Excel", command=lambda: import_excel_workbook(self.app), height=30, width=30, corner_radius=5, border_color="blue", font=("Arial", 30))
         backup.grid(column=0, row=0)
         imp.grid(column=0, row=1)
+        imp_excel.grid(column=0, row=2)
 
     def center_on_parent(self, parent, width, height):
         parent.update_idletasks()

@@ -53,49 +53,50 @@ class DetailsViewPane(ctk.CTkFrame):
         # Title
         ctk.CTkLabel(col1, text="Title:").grid(row=0, column=0, sticky="w", padx=padx)
 
-        self.title_value = ctk.CTkLabel(col1, text=self.book[1])
+        self.title_value = ctk.CTkLabel(col1, text=str(self.book[1]) if self.book[1] is not None else "")
         self.title_value.grid(row=0, column=1, sticky="w", padx=padx)
 
         # Author
         ctk.CTkLabel(col1, text="Author:").grid(row=1, column=0, sticky="w", padx=padx, pady=pady)
 
-        self.author_value = ctk.CTkLabel(col1, text=self.book[6] + " " + self.book[7])
+        author_display = f"{self.book[6] or ''} {self.book[7] or ''}".strip()
+        self.author_value = ctk.CTkLabel(col1, text=author_display)
         self.author_value.grid(row=1, column=1, sticky="w", padx=padx, pady=pady)
 
         # Series
         ctk.CTkLabel(col1, text="Series:").grid(row=2, column=0, sticky="w", padx=padx, pady=pady)
 
-        self.series_value = ctk.CTkLabel(col1, text=self.book[3])
+        self.series_value = ctk.CTkLabel(col1, text=str(self.book[3]) if self.book[3] is not None else "")
         self.series_value.grid(row=2, column=1, sticky="w", padx=padx, pady=pady)
 
         # Book number
         ctk.CTkLabel(col1, text="Book #:").grid(row=3, column=0, sticky="w", padx=padx, pady=pady)
 
-        self.book_num = ctk.CTkLabel(col1, text=self.book[4])
+        self.book_num = ctk.CTkLabel(col1, text=str(self.book[4]) if self.book[4] is not None else "")
         self.book_num.grid(row=3, column=1, sticky="w", padx=padx, pady=pady)
 
         # Genre
         ctk.CTkLabel(col1, text="Genre:").grid(row=4, column=0, sticky="w", padx=padx, pady=pady)
 
-        self.genre = ctk.CTkLabel(col1, text=self.book[9])
+        self.genre = ctk.CTkLabel(col1, text=str(self.book[9]) if self.book[9] is not None else "")
         self.genre.grid(row=4, column=1, sticky="w", padx=padx, pady=pady)
 
         # ISBN
         ctk.CTkLabel(col1, text="ISBN:").grid(row=5, column=0, sticky="w", padx=padx, pady=pady)
 
-        self.isbn_value = ctk.CTkLabel(col1, text=self.book[10])
+        self.isbn_value = ctk.CTkLabel(col1, text=str(self.book[10]) if self.book[10] is not None else "")
         self.isbn_value.grid(row=5, column=1, sticky="w", padx=padx, pady=pady)
 
         # Rating
         ctk.CTkLabel(col2, text="Rating:").grid(row=0, column=0, sticky="w", padx=padx, pady=pady)
 
-        self.rating_value = ctk.CTkLabel(col2, text=self.book[8])
+        self.rating_value = ctk.CTkLabel(col2, text=str(self.book[8]) if self.book[8] is not None else "")
         self.rating_value.grid(row=0, column=1, sticky="w", padx=padx, pady=pady)
 
         # NLS Order
         ctk.CTkLabel(col2, text="NLS Order:").grid(row=1, column=0, sticky="w", padx=padx, pady=pady)
 
-        self.nls_value = ctk.CTkLabel(col2, text=self.book[11])
+        self.nls_value = ctk.CTkLabel(col2, text=str(self.book[11]) if self.book[11] is not None else "")
         self.nls_value.grid(row=1, column=1, sticky="w", padx=padx, pady=pady)
 
         # Topics
@@ -106,5 +107,5 @@ class DetailsViewPane(ctk.CTkFrame):
         # Description
         ctk.CTkLabel(col2, text="Description:").grid(row=3, column=0, sticky="w", padx=padx, pady=pady)
 
-        self.desc_value = ctk.CTkLabel(col2, text=self.book[12])
+        self.desc_value = ctk.CTkLabel(col2, text=str(self.book[12]) if self.book[12] is not None else "")
         self.desc_value.grid(row=3, column=1, sticky="w", padx=padx, pady=pady)

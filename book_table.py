@@ -92,7 +92,7 @@ class BookTable(tk.Frame):
             tag = ""
             genre_color_tag = db_get.get_genres_by_title(book[7])
 
-            if genre_color_tag[0][2] is not None:
+            if genre_color_tag and genre_color_tag[0][2] is not None:
                 tag = genre_color_tag[0][1]
             else:
                 tag = "evenrow" if index % 2 == 0 else "oddrow"

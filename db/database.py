@@ -2,11 +2,11 @@ import sqlite3
 
 from db.config import DB_NAME
 
-def get_connection():
-    return sqlite3.connect(DB_NAME)
+def get_connection(db_name=None):
+    return sqlite3.connect(db_name if db_name is not None else DB_NAME)
 
-def create_tables():
-    conn = get_connection()
+def create_tables(db_name=None):
+    conn = get_connection(db_name)
     cursor = conn.cursor()
 
     # Create Books

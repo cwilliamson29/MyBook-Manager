@@ -17,7 +17,7 @@ class DetailsEditPane(ctk.CTkFrame):
 
         self.authors = db_get.get_authors()
         self.topics = db_get.get_topics()
-        series = db_get.get_series_by_author(self.book[5])
+        series = db_get.get_series_by_author(self.book[5]) if self.book[5] is not None else []
         self.genres = db_get.get_genres_titles()
         self.topic_ids = db_get.get_book_topics_id(self.book[0])
 
@@ -67,7 +67,8 @@ class DetailsEditPane(ctk.CTkFrame):
         ctk.CTkLabel(col1, text="Title:").grid(row=0, column=0, sticky="e", **self.pad)
         self.title_entry = ctk.CTkEntry(col1, **self.style)
         self.title_entry.grid(row=0, column=1, sticky="w", **self.pad)
-        self.title_entry.insert(0, self.book[1])
+        if self.book[1] is not None:
+            self.title_entry.insert(0, str(self.book[1]))
 
         # Author
         ctk.CTkLabel(col1, text="Author:").grid(row=1, column=0, sticky="e", **self.pad)
@@ -89,9 +90,13 @@ class DetailsEditPane(ctk.CTkFrame):
             command=self.author_selected,
             **self.style
         )
-        self.selected_author.set(
-            self.author_id_map[self.book[5]]
-        )
+        if self.book[5] in self.author_id_map:
+            self.selected_author.set(self.author_id_map[self.book[5]])
+        elif self.book[6] or self.book[7]:
+            author_display = f"{self.book[6] or ''} {self.book[7] or ''}".strip()
+            self.selected_author.set(author_display)
+            if self.book[5] is not None:
+                self.author_map[author_display] = self.book[5]
         dropdown.grid(row=1, column=1, sticky="w", **self.pad)
         # self.selected_author.trace_add("write", self.author_selected)
 
@@ -109,11 +114,15 @@ class DetailsEditPane(ctk.CTkFrame):
             for series_id, title in series
         }
         if self.series_id is not None:
-            self.selected_series.set(self.series_id_map[self.book[2]])
+            if self.book[2] in self.series_id_map:
+                self.selected_series.set(self.series_id_map[self.book[2]])
+            elif self.book[3]:
+                self.selected_series.set(str(self.book[3]))
+                self.series_map[str(self.book[3])] = self.series_id
 
         self.series_dropdown = ctk.CTkComboBox(
             col1,
-            values=list(self.series_map),
+            values=list(self.series_map.keys()),
             variable=self.selected_series,
             **self.style
         )
@@ -125,7 +134,8 @@ class DetailsEditPane(ctk.CTkFrame):
         ctk.CTkLabel(col1, text="Book #:").grid(row=3, column=0, sticky="e", **self.pad)
         self.book_num_entry = ctk.CTkEntry(col1, **self.style)
         self.book_num_entry.grid(row=3, column=1, sticky="w", **self.pad)
-        self.book_num_entry.insert(0, self.book[4])
+        if self.book[4] is not None:
+            self.book_num_entry.insert(0, str(self.book[4]))
 
         # Genre
         ctk.CTkLabel(col1, text="Genre:").grid(row=4, column=0, sticky="e", **self.pad)
@@ -140,33 +150,37 @@ class DetailsEditPane(ctk.CTkFrame):
             variable=self.selected_genre,
             **self.style
         )
-        self.selected_genre.set(self.book[9])
+        if self.book[9] is not None:
+            self.selected_genre.set(str(self.book[9]))
         self.genre_dropdown.grid(row=4, column=1, sticky="w", **self.pad)
 
         # ISBN
         ctk.CTkLabel(col1, text="ISBN:").grid(row=5, column=0, sticky="e", **self.pad)
         self.isbn_entry = ctk.CTkEntry(col1, **self.style)
         self.isbn_entry.grid(row=5, column=1, sticky="w", **self.pad)
-        self.isbn_entry.insert(0, self.book[10])
+        if self.book[10] is not None:
+            self.isbn_entry.insert(0, str(self.book[10]))
 
         # Rating
         ctk.CTkLabel(col2, text="Rating:").grid(row=0, column=0, sticky="e", **self.pad)
         self.rating_entry = ctk.CTkEntry(col2, **self.style)
         self.rating_entry.grid(row=0, column=1, sticky="w", **self.pad)
-        self.rating_entry.insert(0, self.book[8])
+        if self.book[8] is not None:
+            self.rating_entry.insert(0, str(self.book[8]))
 
         # NLS Order
         ctk.CTkLabel(col2, text="NLS Order:").grid(row=1, column=0, sticky="e", **self.pad)
         self.nls_order_entry = ctk.CTkEntry(col2, **self.style)
         self.nls_order_entry.grid(row=1, column=1, sticky="w", **self.pad)
-        self.nls_order_entry.insert(0, self.book[11])
+        if self.book[11] is not None:
+            self.nls_order_entry.insert(0, str(self.book[11]))
 
         # Description
         ctk.CTkLabel(col2, text="Description:").grid(row=2, column=0, sticky="ne", **self.pad)
         self.description_entry = ctk.CTkTextbox(col2, **self.style, height=100)
         self.description_entry.grid(row=2, column=1, sticky="w", **self.pad)
         if self.book[12] is not None:
-            self.description_entry.insert("0.0", self.book[12])
+            self.description_entry.insert("0.0", str(self.book[12]))
 
         #Topics frame
         ctk.CTkLabel(col3, text="Topics:").grid(row=0, column=0, sticky="ne", **self.pad)
@@ -177,13 +191,9 @@ class DetailsEditPane(ctk.CTkFrame):
 
 
     def author_selected(self, name):
-
-        # selected = self.selected_author.get()
-        #
-        # if not selected:
-        #     return
-
-        author_id = self.author_map[name]
+        author_id = self.author_map.get(name)
+        if author_id is None:
+            return
 
         # Get series from database
         series = db_get.get_series_by_author(author_id)
@@ -197,71 +207,60 @@ class DetailsEditPane(ctk.CTkFrame):
 
         if not self.series_map:
             self.selected_series.set("")
-            self.series_id = self.book[2]
-            # self.series_dropdown.grid_forget()
-            # self.series_label.grid_forget()
-            # self.num_in_series.grid_forget()
-            # self.num_in_series_entry.grid_forget()
+            self.series_id = None
         else:
             # Show dropdown only AFTER author selected
             self.series_label.grid(row=2, column=0, sticky="e", **self.pad)
             self.series_dropdown.grid(row=2, column=1, sticky="w", **self.pad)
-            # self.num_in_series.grid(row=3, column=0, sticky="e", pady=2)
-            # self.num_in_series_entry.grid(row=3, column=1, sticky="w", pady=2)
-
-        # Set default value
-        if series:
-            self.selected_series.set(series[0][1])
+            if series:
+                self.selected_series.set(series[0][1])
 
     def save_book(self):
         book_id = self.book[0]
         title = self.title_entry.get().strip()
-        author_name = self.selected_author.get()
-        series = self.selected_series.get()
+        author_name = self.selected_author.get().strip()
+        series = self.selected_series.get().strip()
 
         if not series:
             series_id = None
         else:
-            series_id = self.series_map[series]
+            series_id = self.series_map.get(series)
 
         book_num = self.book_num_entry.get().strip()
         rating = self.rating_entry.get().strip()
-        genre = self.selected_genre.get()
+        genre = self.selected_genre.get().strip()
 
         if not genre:
             genre_id = None
         else:
-            genre_id = self.genre_map[genre]
+            genre_id = self.genre_map.get(genre)
 
         isbn = self.isbn_entry.get().strip()
         nls = self.nls_order_entry.get().strip()
         desc = self.description_entry.get("1.0", "end-1c").strip()
         topics = self.topics_frame.get_selected_topics()
 
-        author_id = self.author_map[author_name]
+        author_id = self.author_map.get(author_name)
 
         data = (title, author_id, series_id, book_num, rating, genre_id, isbn, nls, desc, book_id)
         db_attempt = db_update.update_book(data)
         if db_attempt == "success":
             topics_remove = db_update.remove_book_topic((book_id,))
             if topics_remove == "success":
-                if topics is not []:
-                    result = []
+                success = True
+                if topics:
                     for topics_id in topics:
                         topics_data = (book_id, topics_id)
                         topics_db_attempt = db_add.add_book_topics(topics_data)
-                        if topics_db_attempt == "success":
-                            result = topics_db_attempt
-                        else:
-                            result = topics_db_attempt
-                    if result[0] == "success":
-                        self.par.load_book(self.book[0])
-                        self.app.load_books()
-                    else:
-                        print(result)
-                        self.error_msg.configure(text=f"Error: {result[0]}")
-                        self.error_msg.grid(row=0, column=2, sticky="w", padx=5, pady=2)
-
+                        if not isinstance(topics_db_attempt, tuple) or topics_db_attempt[0] != "success":
+                            success = False
+                            print(topics_db_attempt)
+                            self.error_msg.configure(text=f"Error: {topics_db_attempt}")
+                            self.error_msg.grid(row=0, column=2, sticky="w", padx=5, pady=2)
+                            break
+                if success:
+                    self.par.load_book(self.book[0])
+                    self.app.load_books()
             else:
                 print(topics_remove)
                 self.error_msg.configure(text=f"Error: {topics_remove}")

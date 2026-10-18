@@ -281,13 +281,14 @@ class MyBookManager:
         self.details.pack_forget()
 
 
-ctk.set_appearance_mode("Dark")
+if __name__ == "__main__":
+    ctk.set_appearance_mode("Dark")
 
-root = ctk.CTk()
-root.fg_color="gray20"
+    root = ctk.CTk()
+    root.fg_color="gray20"
 
-database.create_tables()
+    database.create_tables()
 
-app = MyBookManager(root)
+    app = MyBookManager(root)
 
-root.mainloop()
+    root.mainloop()
