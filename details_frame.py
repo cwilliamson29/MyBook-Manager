@@ -8,6 +8,7 @@ from PIL import ImageTk
 from db import db_get
 from details_edit_pane import DetailsEditPane
 from details_view_pane import DetailsViewPane
+from details_multi_edit_pane import DetailsMultiEditPane
 
 
 class DetailsFrame(ctk.CTkFrame):
@@ -61,6 +62,14 @@ class DetailsFrame(ctk.CTkFrame):
             self.details_pane.destroy()
 
         self.details_pane = DetailsEditPane(self.center_frame_details, self, self.app, book[0])
+        self.details_pane.pack(side="top", anchor="n", fill="x", expand=True)
+
+    def load_multi_books(self, book_ids):
+        self.book_id = None
+        if self.details_pane is not None:
+            self.details_pane.destroy()
+
+        self.details_pane = DetailsMultiEditPane(self.center_frame_details, self, self.app, book_ids)
         self.details_pane.pack(side="top", anchor="n", fill="x", expand=True)
 
     def load_image_from_url(self, url):

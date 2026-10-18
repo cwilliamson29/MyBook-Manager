@@ -58,6 +58,22 @@ class BookTable(tk.Frame):
         self.tree.bind("<Button-1>", self.on_click)
         self.tree.bind("<<TreeviewSelect>>", self.on_book_selected)
 
+        # Context menu
+        self.context_menu = tk.Menu(self.tree, tearoff=0)
+        self.context_menu.add_command(label="Edit Selected (Genre & Topics)", command=self.edit_selected)
+        self.context_menu.add_separator()
+        self.context_menu.add_command(label="Select All", command=self.select_all)
+        self.context_menu.add_command(label="Deselect All", command=self.deselect_all)
+        self.context_menu.add_separator()
+        self.context_menu.add_command(label="Delete Selected", command=self.delete_selected)
+
+        self.tree.bind("<Button-2>", self.show_context_menu)
+        self.tree.bind("<Button-3>", self.show_context_menu)
+        self.tree.bind("<Control-Button-1>", self.show_context_menu)
+
+        self.tree.bind("<Control-a>", self.select_all)
+        self.tree.bind("<Command-a>", self.select_all)
+
         self.tree.pack(fill="both", expand=True, pady=2)
 
     def load_books(self):
@@ -159,7 +175,11 @@ class BookTable(tk.Frame):
         # ====================================
 
         if column == "#1":
-            self.delete_book(book_id)
+            selected = self.tree.selection()
+            if len(selected) > 1 and row_id in selected:
+                self.delete_selected_books([int(i) for i in selected])
+            else:
+                self.delete_book(book_id)
 
     # ========================================
     # DELETE BOOK
@@ -177,10 +197,25 @@ class BookTable(tk.Frame):
 
         # Delete from database
         db_update.delete_book(book_id)
+        self.app.close_book()
 
         # Reload table
         books = db_get.get_books()
 
+        self.populate_table(books)
+
+    def delete_selected_books(self, book_ids):
+        count = len(book_ids)
+        confirm = messagebox.askyesno(
+            "Confirm Delete",
+            f"Delete {count} selected books?"
+        )
+        if not confirm:
+            return
+
+        db_update.delete_multiple_books(book_ids)
+        self.app.close_book()
+        books = db_get.get_books()
         self.populate_table(books)
 
     def on_book_selected(self, event):
@@ -190,13 +225,56 @@ class BookTable(tk.Frame):
         if not selected:
             return
 
-        book_id = int(selected[0])
+        if len(selected) == 1:
+            book_id = int(selected[0])
+            self.app.show_book_details(book_id)
+        else:
+            book_ids = [int(i) for i in selected]
+            self.app.show_multi_book_details(book_ids)
 
-        # book = get_book_details(book_id)
+    def select_all(self, event=None):
+        children = self.tree.get_children()
+        if children:
+            self.tree.selection_set(children)
+            book_ids = [int(i) for i in children]
+            if len(book_ids) == 1:
+                self.app.show_book_details(book_ids[0])
+            else:
+                self.app.show_multi_book_details(book_ids)
+        return "break"
 
-        # self.parent.book_details.load_book(book_id)
-        # self.parent.details_frame.load_book(book_id)
-        # print("here: ")
-        # print(hasattr(self.app, "details_frame"))
-        # print(type(self.app.details))
-        self.app.show_book_details(book_id)
+    def deselect_all(self, event=None):
+        self.tree.selection_remove(self.tree.selection())
+        self.app.close_book()
+        return "break"
+
+    def edit_selected(self):
+        selected = self.tree.selection()
+        if not selected:
+            return
+        if len(selected) == 1:
+            book_id = int(selected[0])
+            self.app.show_book_details(book_id)
+            self.app.details.edit_book(book_id)
+        else:
+            book_ids = [int(i) for i in selected]
+            self.app.show_multi_book_details(book_ids)
+
+    def delete_selected(self):
+        selected = self.tree.selection()
+        if not selected:
+            return
+        if len(selected) == 1:
+            self.delete_book(int(selected[0]))
+        else:
+            self.delete_selected_books([int(i) for i in selected])
+
+    def show_context_menu(self, event):
+        row_id = self.tree.identify_row(event.y)
+        if row_id:
+            current_selection = self.tree.selection()
+            if row_id not in current_selection:
+                self.tree.selection_set(row_id)
+        selected = self.tree.selection()
+        if selected:
+            self.context_menu.tk_popup(event.x_root, event.y_root)

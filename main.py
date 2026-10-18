@@ -120,6 +120,12 @@ class MyBookManager:
 
         tk.Button(
             self.center_frame,
+            text="Edit Selected",
+            command=self.open_selected_edit
+        ).grid(row=0, column=999, padx=5)
+
+        tk.Button(
+            self.center_frame,
             text="Load Books",
             command=self.load_books
         ).grid(row=0, column=1000)
@@ -209,6 +215,7 @@ class MyBookManager:
         else:
             self.author_filter.grid_forget()
             self.topic_filter.grid_forget()
+            self.genre_filter.grid_forget()
 
     def load_authors_into_filter(self):
 
@@ -275,6 +282,23 @@ class MyBookManager:
         self.details.pack(side="top", fill="x", anchor="n")
         # book = get_book_details(book_id)
         self.details.load_book(book_id)
+
+    def show_multi_book_details(self, book_ids):
+        self.details_framed.pack(side="top", fill="x", anchor="n", before=self.center_frame)
+        self.details.pack(side="top", fill="x", anchor="n")
+        self.details.load_multi_books(book_ids)
+
+    def open_selected_edit(self):
+        selected = self.book_table.tree.selection()
+        if not selected:
+            return
+        if len(selected) == 1:
+            book_id = int(selected[0])
+            self.show_book_details(book_id)
+            self.details.edit_book(book_id)
+        else:
+            book_ids = [int(i) for i in selected]
+            self.show_multi_book_details(book_ids)
 
     def close_book(self):
         self.details_framed.pack_forget()
