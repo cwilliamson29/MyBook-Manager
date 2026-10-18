@@ -137,6 +137,15 @@ def parse_isbn_safe(val):
     return str(val).strip()
 
 
+def parse_nls_safe(val):
+    if val is None or val == "":
+        return None
+    if isinstance(val, float) and val.is_integer():
+        return str(int(val))
+    s = str(val).strip()
+    return s if s else None
+
+
 def find_or_create_author(cursor, first_name, last_name, cache=None):
     first_name = str(first_name).strip() if first_name else ""
     last_name = str(last_name).strip() if last_name else ""
@@ -331,7 +340,8 @@ def import_sheet_positional(sheet, cursor, stats, author_cache=None, series_cach
     - Column B: Series -> add/find in DB linking author to series. If blank, skipped.
     - Column C: Number in series -> used if Column B is not empty.
     - Column D: Book title -> add book to DB linking author, series, num_in_series.
-    - Genre: "None" (if "none" is not in DB, create it).
+    - Column F: NLS Order -> stored as nls_order in database.
+    - Column H: Genre -> add/find in DB. If cell value is blank, defaults to "None".
     """
     rows = list(sheet.iter_rows(values_only=True))
     if len(rows) <= 1:
@@ -348,6 +358,8 @@ def import_sheet_positional(sheet, cursor, stats, author_cache=None, series_cach
         raw_series = row[1] if len(row) > 1 else None
         raw_num = row[2] if len(row) > 2 else None
         raw_title = row[3] if len(row) > 3 else None
+        raw_nls = row[5] if len(row) > 5 else None
+        raw_genre = row[7] if len(row) > 7 else None
 
         title = parse_str_safe(raw_title)
         if not title:
@@ -372,8 +384,14 @@ def import_sheet_positional(sheet, cursor, stats, author_cache=None, series_cach
             series_id = None
             num_in_series = None
 
-        # Genre: "None" (if "none" is not an option for the database then create it)
-        genre_id, genre_created = find_or_create_genre(cursor, "None", cache=genre_cache)
+        # Column F: NLS Order
+        nls_order = parse_nls_safe(raw_nls)
+
+        # Column H: Genre (if cell value is blank then value needs to be "none")
+        genre_name = parse_str_safe(raw_genre)
+        if not genre_name:
+            genre_name = "None"
+        genre_id, genre_created = find_or_create_genre(cursor, genre_name, cache=genre_cache)
         if genre_created:
             stats["genres"] += 1
 
@@ -384,7 +402,7 @@ def import_sheet_positional(sheet, cursor, stats, author_cache=None, series_cach
                 published_date, rating, isbn, genre_id, author_id, description
             ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
             (
-                title, series_id, num_in_series, 0, None,
+                title, series_id, num_in_series, 0, nls_order,
                 None, None, None, genre_id, author_id, None
             )
         )
@@ -644,7 +662,8 @@ def import_excel_data(file_path, db_path=None):
             # Column B: Series (skipped if blank)
             # Column C: Number in series (if Column B is not empty)
             # Column D: Book Title
-            # Genre: "None" (created in DB if not existing)
+            # Column F: NLS Order
+            # Column H: Genre (defaults to "None" if blank)
             for sheet in wb.worksheets:
                 import_sheet_positional(
                     sheet,
