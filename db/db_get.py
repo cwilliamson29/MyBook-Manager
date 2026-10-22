@@ -373,6 +373,62 @@ def get_book_cover(book_id):
     finally:
         conn.close()
 
+def get_book_audio_folder(book_id):
+    """
+    Returns the audiobook folder path for a book, or None.
+    """
+    conn = get_connection()
+    cur = conn.cursor()
+    try:
+        cur.execute("SELECT audio_folder FROM books WHERE id = ?", (book_id,))
+        row = cur.fetchone()
+        if row and row[0]:
+            return row[0]
+        return None
+    except Exception as e:
+        print("Error getting book audio folder:", e)
+        return None
+    finally:
+        conn.close()
+
+def get_book_audio_progress(book_id):
+    """
+    Returns (audio_track, audio_position) tuple for a book, or (None, 0.0).
+    """
+    conn = get_connection()
+    cur = conn.cursor()
+    try:
+        cur.execute("SELECT audio_track, audio_position FROM books WHERE id = ?", (book_id,))
+        row = cur.fetchone()
+        if row:
+            track = row[0]
+            pos = float(row[1]) if row[1] is not None else 0.0
+            return track, pos
+        return None, 0.0
+    except Exception as e:
+        print("Error getting book audio progress:", e)
+        return None, 0.0
+    finally:
+        conn.close()
+
+def get_book_audio_speed(book_id):
+    """
+    Returns the saved playback speed for a book, or 1.0.
+    """
+    conn = get_connection()
+    cur = conn.cursor()
+    try:
+        cur.execute("SELECT audio_speed FROM books WHERE id = ?", (book_id,))
+        row = cur.fetchone()
+        if row and row[0] is not None:
+            return float(row[0])
+        return 1.0
+    except Exception as e:
+        print("Error getting book audio speed:", e)
+        return 1.0
+    finally:
+        conn.close()
+
 def get_books_missing_covers_count():
     """
     Returns the count of books with an ISBN that currently have no cover image.

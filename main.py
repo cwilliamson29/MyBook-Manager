@@ -26,6 +26,7 @@ class MyBookManager:
         self.root.title("MyBook Manager")
 
         self.center_window(1280, 800)
+        self.root.protocol("WM_DELETE_WINDOW", self.on_app_close)
 
         img_path = "assets/img/gear-icon.webp"
         gear_pil = Image.open(img_path)
@@ -306,8 +307,15 @@ class MyBookManager:
             self.show_multi_book_details(book_ids)
 
     def close_book(self):
+        if hasattr(self.details, "cleanup"):
+            self.details.cleanup()
         self.details_framed.pack_forget()
         self.details.pack_forget()
+
+    def on_app_close(self):
+        if hasattr(self.details, "cleanup"):
+            self.details.cleanup()
+        self.root.destroy()
 
 
 if __name__ == "__main__":

@@ -147,17 +147,33 @@ def create_tables(db_name=None):
         author_id INTEGER NOT NULL,
         description TEXT,
         cover_image BLOB,
+        audio_folder TEXT,
+        audio_track TEXT,
+        audio_position REAL DEFAULT 0.0,
+        audio_speed REAL DEFAULT 1.0,
         FOREIGN KEY(author_id) REFERENCES authors(id),
         FOREIGN KEY(series_id) REFERENCES series(id),
         FOREIGN KEY(genre_id) REFERENCES genre(id)
         )''')
     conn.commit()
 
-    # Ensure cover_image column exists for existing databases
+    # Ensure cover_image, audio_folder, audio_track, audio_position, and audio_speed columns exist for existing databases
     cursor.execute("PRAGMA table_info(books)")
     existing_book_cols = [col[1] for col in cursor.fetchall()]
     if "cover_image" not in existing_book_cols:
         cursor.execute("ALTER TABLE books ADD COLUMN cover_image BLOB")
+        conn.commit()
+    if "audio_folder" not in existing_book_cols:
+        cursor.execute("ALTER TABLE books ADD COLUMN audio_folder TEXT")
+        conn.commit()
+    if "audio_track" not in existing_book_cols:
+        cursor.execute("ALTER TABLE books ADD COLUMN audio_track TEXT")
+        conn.commit()
+    if "audio_position" not in existing_book_cols:
+        cursor.execute("ALTER TABLE books ADD COLUMN audio_position REAL DEFAULT 0.0")
+        conn.commit()
+    if "audio_speed" not in existing_book_cols:
+        cursor.execute("ALTER TABLE books ADD COLUMN audio_speed REAL DEFAULT 1.0")
         conn.commit()
 
     # Create Authors

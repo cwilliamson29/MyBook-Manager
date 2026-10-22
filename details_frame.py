@@ -12,6 +12,7 @@ from windows.cover_search_dialog import CoverSearchDialog
 from details_edit_pane import DetailsEditPane
 from details_view_pane import DetailsViewPane
 from details_multi_edit_pane import DetailsMultiEditPane
+from audio_player_pane import AudioPlayerPane
 
 
 class DetailsFrame(ctk.CTkFrame):
@@ -29,14 +30,16 @@ class DetailsFrame(ctk.CTkFrame):
         self.grid_columnconfigure(3, weight=1)
 
         # Left frame for cover image and upload/remove controls
-        self.left_frame = ctk.CTkFrame(self, width=180, fg_color=("gray88", "gray20"), corner_radius=8)
+        self.left_frame = ctk.CTkFrame(self, width=175, fg_color=("gray88", "gray20"), corner_radius=8)
         self.left_frame.pack(side="left", anchor="n", padx=(10, 5), pady=8, expand=False)
 
+        # Center frame for book details / edit view
         self.center_frame_details = ctk.CTkFrame(self, fg_color=("gray88", "gray20"), corner_radius=8)
-        self.center_frame_details.pack(side="left", anchor="n", fill="x", expand=True, pady=8)
+        self.center_frame_details.pack(side="left", anchor="n", fill="both", expand=True, padx=(0, 5), pady=8)
 
-        self.right_frame = ctk.CTkFrame(self, width=20, fg_color="transparent")
-        self.right_frame.pack(side="right", anchor="ne")
+        # Right frame for MP3 / Audiobook player
+        self.audio_player = AudioPlayerPane(self, app=self.app, width=380)
+        self.audio_player.pack(side="right", anchor="n", fill="y", expand=False, padx=(0, 10), pady=8)
 
         # Cover image display label (clickable to upload)
         self.cover_label = ctk.CTkLabel(self.left_frame, text="", cursor="hand2")
@@ -251,6 +254,8 @@ class DetailsFrame(ctk.CTkFrame):
             self.details_pane.pack(side="top", anchor="n", fill="x", expand=True)
 
         self.load_cover_image(book_id)
+        if hasattr(self, "audio_player") and self.audio_player:
+            self.audio_player.set_book(book_id)
 
     def edit_book(self, book_id):
         book = db_get.get_book_by_id(book_id)
@@ -264,6 +269,8 @@ class DetailsFrame(ctk.CTkFrame):
             self.details_pane.pack(side="top", anchor="n", fill="x", expand=True)
 
         self.load_cover_image(book_id)
+        if hasattr(self, "audio_player") and self.audio_player:
+            self.audio_player.set_book(book_id)
 
     def load_multi_books(self, book_ids):
         self.book_id = None
@@ -274,6 +281,13 @@ class DetailsFrame(ctk.CTkFrame):
         self.details_pane.pack(side="top", anchor="n", fill="x", expand=True)
 
         self.load_cover_image(None)
+        if hasattr(self, "audio_player") and self.audio_player:
+            self.audio_player.set_book(None)
+
+    def cleanup(self):
+        """Stops any active audio and cleans up resources."""
+        if hasattr(self, "audio_player") and self.audio_player:
+            self.audio_player.cleanup()
 
     def load_image_from_url(self, url):
         """Fetches image from URL and returns a PIL Image object."""

@@ -70,6 +70,67 @@ def update_book_isbn(book_id, isbn):
     finally:
         conn.close()
 
+def update_book_audio_folder(book_id, folder_path):
+    """
+    Updates or clears the audiobook folder path for a book.
+    """
+    conn = get_connection()
+    cursor = conn.cursor()
+    try:
+        clean_path = str(folder_path).strip() if folder_path else None
+        cursor.execute("UPDATE books SET audio_folder = ? WHERE id = ?", (clean_path, book_id))
+        conn.commit()
+        return "success"
+    except sqlite3.Error as e:
+        print("SQLite error in update_book_audio_folder: ", e)
+        conn.rollback()
+        return str(e)
+    finally:
+        conn.close()
+
+def update_book_audio_progress(book_id, audio_track, audio_position):
+    """
+    Updates the saved audio track and playback position in seconds for a book.
+    """
+    conn = get_connection()
+    cursor = conn.cursor()
+    try:
+        clean_track = str(audio_track).strip() if audio_track else None
+        pos = max(0.0, float(audio_position)) if audio_position is not None else 0.0
+        cursor.execute(
+            "UPDATE books SET audio_track = ?, audio_position = ? WHERE id = ?",
+            (clean_track, pos, book_id)
+        )
+        conn.commit()
+        return "success"
+    except sqlite3.Error as e:
+        print("SQLite error in update_book_audio_progress: ", e)
+        conn.rollback()
+        return str(e)
+    finally:
+        conn.close()
+
+def update_book_audio_speed(book_id, audio_speed):
+    """
+    Updates the saved audio playback speed for a book.
+    """
+    conn = get_connection()
+    cursor = conn.cursor()
+    try:
+        speed = float(audio_speed) if audio_speed is not None else 1.0
+        cursor.execute(
+            "UPDATE books SET audio_speed = ? WHERE id = ?",
+            (speed, book_id)
+        )
+        conn.commit()
+        return "success"
+    except sqlite3.Error as e:
+        print("SQLite error in update_book_audio_speed: ", e)
+        conn.rollback()
+        return str(e)
+    finally:
+        conn.close()
+
 def update_genre_color(genre_id, color_scheme):
     """
     Updates the color scheme for a genre.
