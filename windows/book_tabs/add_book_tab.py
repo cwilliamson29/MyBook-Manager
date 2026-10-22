@@ -1,8 +1,10 @@
 import tkinter as tk
+import threading
 import customtkinter as ctk
 from CTkColorPicker import *
 
 from db import db_get, db_add
+from windows.settings_helpers.cover_fetcher import auto_fetch_and_save_book_cover
 from windows.book_tabs.helpers.topics_scrollable import TopicsFrame
 
 
@@ -206,6 +208,15 @@ class AddBookTab(tk.Frame):
         db_attempt = db_add.add_book(data)
 
         if db_attempt[0] == "success":
+            new_book_id = db_attempt[1]
+            if isbn:
+                def _bg_cover_fetch(bid, book_isbn):
+                    try:
+                        auto_fetch_and_save_book_cover(bid, book_isbn)
+                    except Exception as e:
+                        print("Error auto-fetching cover on book create:", e)
+                threading.Thread(target=_bg_cover_fetch, args=(new_book_id, isbn), daemon=True).start()
+
             if topics is not []:
                 for topics_id in topics:
                     topics_data = (db_attempt[1],topics_id)

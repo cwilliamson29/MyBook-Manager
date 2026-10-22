@@ -11,7 +11,7 @@ except ImportError:
     openpyxl = None
 
 from db.config import DB_NAME
-from db.database import create_tables
+from db.database import create_tables, clean_author_parts, normalize_author_key, combine_duplicate_authors
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 DB_PATH = PROJECT_ROOT / DB_NAME
@@ -67,14 +67,17 @@ def parse_author_name(name_str):
         parts = [p.strip() for p in name_str.split(",", 1)]
         last_name = parts[0]
         first_name = parts[1] if len(parts) > 1 and parts[1] else ""
+        first_name, last_name = clean_author_parts(first_name, last_name)
         return first_name, last_name
     else:
         parts = name_str.split()
         if len(parts) == 1:
-            return parts[0], ""
+            first_name, last_name = clean_author_parts(parts[0], "")
+            return first_name, last_name
         else:
             first_name = " ".join(parts[:-1])
             last_name = parts[-1]
+            first_name, last_name = clean_author_parts(first_name, last_name)
             return first_name, last_name
 
 
@@ -147,16 +150,21 @@ def parse_nls_safe(val):
 
 
 def find_or_create_author(cursor, first_name, last_name, cache=None):
-    first_name = str(first_name).strip() if first_name else ""
-    last_name = str(last_name).strip() if last_name else ""
+    first_name, last_name = clean_author_parts(first_name, last_name)
     if not first_name and not last_name:
         first_name = "Unknown"
         last_name = "Author"
 
-    key = (first_name.lower(), last_name.lower())
-    if cache is not None and key in cache:
-        return cache[key], False
+    norm_key = normalize_author_key(first_name, last_name)
+    raw_key = (first_name.lower(), last_name.lower())
 
+    if cache is not None:
+        if norm_key in cache:
+            return cache[norm_key], False
+        if raw_key in cache:
+            return cache[raw_key], False
+
+    # Check exact match
     cursor.execute(
         "SELECT id FROM authors WHERE LOWER(TRIM(first_name)) = ? AND LOWER(TRIM(last_name)) = ?",
         (first_name.lower(), last_name.lower())
@@ -166,15 +174,29 @@ def find_or_create_author(cursor, first_name, last_name, cache=None):
         author_id = row[0]
         created = False
     else:
-        cursor.execute(
-            "INSERT INTO authors (first_name, last_name) VALUES (?, ?)",
-            (first_name, last_name)
-        )
-        author_id = cursor.lastrowid
-        created = True
+        # Check normalized match across existing authors
+        cursor.execute("SELECT id, first_name, last_name FROM authors")
+        existing_authors = cursor.fetchall()
+        matching_id = None
+        for aid, f, l in existing_authors:
+            if normalize_author_key(f, l) == norm_key:
+                matching_id = aid
+                break
+
+        if matching_id is not None:
+            author_id = matching_id
+            created = False
+        else:
+            cursor.execute(
+                "INSERT INTO authors (first_name, last_name) VALUES (?, ?)",
+                (first_name, last_name)
+            )
+            author_id = cursor.lastrowid
+            created = True
 
     if cache is not None:
-        cache[key] = author_id
+        cache[norm_key] = author_id
+        cache[raw_key] = author_id
     return author_id, created
 
 
@@ -675,6 +697,7 @@ def import_excel_data(file_path, db_path=None):
                 )
 
         conn.commit()
+        combine_duplicate_authors(target_db)
         return stats
 
     except Exception:
@@ -684,7 +707,7 @@ def import_excel_data(file_path, db_path=None):
         conn.close()
 
 
-def import_excel_workbook(app=None, file_path=None):
+def import_excel_workbook(app=None, file_path=None, parent=None):
     """
     GUI / interactive handler for importing an Excel workbook.
     Prompts user to select a file (if file_path is None), backs up the database,
@@ -693,12 +716,14 @@ def import_excel_workbook(app=None, file_path=None):
     if openpyxl is None:
         messagebox.showerror(
             "Missing Dependency",
-            "openpyxl is required to import Excel files.\nPlease install openpyxl (pip install openpyxl)."
+            "openpyxl is required to import Excel files.\nPlease install openpyxl (pip install openpyxl).",
+            parent=parent
         )
         return
 
     if not file_path:
         file_path = filedialog.askopenfilename(
+            parent=parent,
             title="Choose an Excel workbook to import",
             filetypes=[
                 ("Excel Workbook", "*.xlsx *.xlsm *.xltx *.xltm *.xls"),
@@ -712,7 +737,8 @@ def import_excel_workbook(app=None, file_path=None):
     confirmed = messagebox.askyesno(
         "Import Excel Workbook?",
         f"Do you want to import data from:\n{Path(file_path).name}\n\n"
-        "Your existing database will be backed up automatically first."
+        "Your existing database will be backed up automatically first.",
+        parent=parent
     )
     if not confirmed:
         return
@@ -733,7 +759,7 @@ def import_excel_workbook(app=None, file_path=None):
             f"• New genres added: {stats['genres']}\n"
             f"• New topics added: {stats['topics']}"
         )
-        messagebox.showinfo("Import Complete", summary_msg)
+        messagebox.showinfo("Import Complete", summary_msg, parent=parent)
 
         if app is not None:
             if hasattr(app, "book_table") and hasattr(app.book_table, "load_books"):
@@ -753,4 +779,4 @@ def import_excel_workbook(app=None, file_path=None):
                     app.add_window.refresh_book_tab_topics()
 
     except Exception as error:
-        messagebox.showerror("Import Failed", f"Failed to import Excel workbook:\n{error}")
+        messagebox.showerror("Import Failed", f"Failed to import Excel workbook:\n{error}", parent=parent)

@@ -1,8 +1,8 @@
 import sqlite3
-from db.config import DB_NAME
+from db import config
 
 def get_connection():
-    return sqlite3.connect(DB_NAME)
+    return sqlite3.connect(config.DB_NAME)
 
 def add_to_db(sql, args):
     conn = get_connection()
@@ -34,6 +34,24 @@ def update_book(data):
     """
     db = add_to_db(sql, data)
     return db
+
+def update_book_cover(book_id, image_data):
+    """
+    Updates or removes the cover image for a book.
+    image_data: bytes or None
+    """
+    conn = get_connection()
+    cursor = conn.cursor()
+    try:
+        cursor.execute("UPDATE books SET cover_image = ? WHERE id = ?", (image_data, book_id))
+        conn.commit()
+        return "success"
+    except sqlite3.Error as e:
+        print("SQLite error in update_book_cover: ", e)
+        conn.rollback()
+        return str(e)
+    finally:
+        conn.close()
 
 def remove_book_topic(data):
     rem = """DELETE FROM book_topics WHERE book_id = ?"""
@@ -95,3 +113,62 @@ def delete_multiple_books(book_ids):
         return str(e)
     finally:
         conn.close()
+
+
+from db.database import clean_author_parts, normalize_author_key, combine_duplicate_authors
+
+def update_author(author_id, first_name, last_name):
+    first_name, last_name = clean_author_parts(first_name, last_name)
+    key = normalize_author_key(first_name, last_name)
+
+    conn = get_connection()
+    cursor = conn.cursor()
+    try:
+        # Check if another author exists with the same normalized key
+        cursor.execute("SELECT id, first_name, last_name FROM authors WHERE id != ?", (author_id,))
+        other_authors = cursor.fetchall()
+        matching_other = None
+        for oid, ofirst, olast in other_authors:
+            if normalize_author_key(ofirst, olast) == key:
+                matching_other = oid
+                break
+
+        if matching_other is not None:
+            # Merge other author into author_id
+            cursor.execute("UPDATE books SET author_id = ? WHERE author_id = ?", (author_id, matching_other))
+
+            cursor.execute("SELECT id, title FROM series WHERE author_id = ?", (matching_other,))
+            dup_series = cursor.fetchall()
+            for s_id, s_title in dup_series:
+                cursor.execute(
+                    "SELECT id FROM series WHERE author_id = ? AND LOWER(TRIM(title)) = LOWER(TRIM(?))",
+                    (author_id, s_title)
+                )
+                existing_s = cursor.fetchone()
+                if existing_s:
+                    canonical_s_id = existing_s[0]
+                    cursor.execute("UPDATE books SET series_id = ? WHERE series_id = ?", (canonical_s_id, s_id))
+                    cursor.execute("DELETE FROM series WHERE id = ?", (s_id,))
+                else:
+                    cursor.execute("UPDATE series SET author_id = ? WHERE id = ?", (author_id, s_id))
+
+            cursor.execute("DELETE FROM authors WHERE id = ?", (matching_other,))
+
+        cursor.execute("UPDATE authors SET first_name = ?, last_name = ? WHERE id = ?", (first_name, last_name, author_id))
+        conn.commit()
+        return "success"
+    except sqlite3.Error as e:
+        print("SQLite error in update_author: ", e)
+        conn.rollback()
+        return str(e)
+    finally:
+        conn.close()
+
+
+def update_series(series_id, title, author_id=None):
+    if author_id is not None:
+        sql = "UPDATE series SET title = ?, author_id = ? WHERE id = ?"
+        return add_to_db(sql, (title, author_id, series_id))
+    else:
+        sql = "UPDATE series SET title = ? WHERE id = ?"
+        return add_to_db(sql, (title, series_id))

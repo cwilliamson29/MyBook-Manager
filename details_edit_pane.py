@@ -1,9 +1,11 @@
+import threading
 import customtkinter as ctk
 # import tkinter as tk
 import PIL.Image as Image
 from PIL import ImageTk
 
 from db import db_get, db_update, db_add
+from windows.settings_helpers.cover_fetcher import auto_fetch_and_save_book_cover
 from windows.book_tabs.helpers.topics_scrollable import TopicsFrame
 
 
@@ -259,6 +261,18 @@ class DetailsEditPane(ctk.CTkFrame):
                             self.error_msg.grid(row=0, column=2, sticky="w", padx=5, pady=2)
                             break
                 if success:
+                    if isbn:
+                        def _bg_check_cover(bid, book_isbn, details_frame):
+                            try:
+                                existing_cover = db_get.get_book_cover(bid)
+                                if not existing_cover:
+                                    fetched, _ = auto_fetch_and_save_book_cover(bid, book_isbn)
+                                    if fetched and hasattr(details_frame, "load_cover_image"):
+                                        details_frame.after(0, lambda: details_frame.load_cover_image(bid))
+                            except Exception as e:
+                                print("Error checking cover on edit save:", e)
+                        threading.Thread(target=_bg_check_cover, args=(self.book[0], isbn, self.par), daemon=True).start()
+
                     self.par.load_book(self.book[0])
                     self.app.load_books()
             else:
