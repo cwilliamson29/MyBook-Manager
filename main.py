@@ -40,28 +40,25 @@ class MyBookManager:
 
 
         # App frames
-        top_frame = tk.Frame(self.root, height=20)
-        top_frame.pack(side="top", fill="x", anchor="n")
+        top_frame = ctk.CTkFrame(self.root, fg_color="transparent")
+        top_frame.pack(side="top", fill="x", anchor="n", padx=10, pady=(6, 2))
         top_frame.columnconfigure(2, weight=1)
 
-        # outer_details = tk.Frame(self.root, background="gray20")
-        # outer_details.pack(side="top", fill="x", anchor="n")
-        self.details_framed = tk.Frame(self.root, background="gray20")
-        self.details_framed.pack(side="top", fill="x", anchor="n")
+        self.details_framed = ctk.CTkFrame(self.root, fg_color="transparent")
 
-        self.center_frame = tk.Frame(self.root)
-        self.center_frame.pack(side="top", fill="both", anchor="n")
+        self.center_frame = ctk.CTkFrame(self.root, fg_color="transparent")
+        self.center_frame.pack(side="top", fill="x", anchor="n", padx=10, pady=4)
 
         #############################
         # Top frame buttons and label
         #############################
-        add_btn = ctk.CTkButton(top_frame, text="+", command=self.open_add_window, height=36, width=36, corner_radius=5, border_color="blue", font=("Arial", 20, "bold"))
+        add_btn = ctk.CTkButton(top_frame, text="+", command=self.open_add_window, height=36, width=36, corner_radius=5, font=("Arial", 20, "bold"))
         add_btn.grid(row=0, column=0, padx=4, pady=5)
 
-        settings_btn = ctk.CTkButton(top_frame, image=gear_img, text="", command=self.open_settings_window, height=36, width=36, corner_radius=5, border_color="blue")
+        settings_btn = ctk.CTkButton(top_frame, image=gear_img, text="", command=self.open_settings_window, height=36, width=36, corner_radius=5)
         settings_btn.grid(row=0, column=1, padx=4, pady=5)
 
-        app_label = tk.Label(top_frame, text="MyBook Manager", font=("Arial", 14, "bold"), fg="lightblue")
+        app_label = ctk.CTkLabel(top_frame, text="MyBook Manager", font=("Arial", 16, "bold"), text_color=("#0969da", "#58a6ff"))
         app_label.grid(row=0, column=2, sticky="e", padx=4, pady=5)
 
         # self.book_id = tk.StringVar()
@@ -74,60 +71,65 @@ class MyBookManager:
         self.load_mode = tk.StringVar()
         self.load_mode.set("Default")
 
-        tk.Label(self.center_frame, text="Filter:").grid(row=0, column=0)
+        ctk.CTkLabel(self.center_frame, text="Filter:", font=("Arial", 12, "bold")).grid(row=0, column=0, padx=(0, 6), pady=4)
 
-        mode_dropdown = ttk.Combobox(
+        mode_dropdown = ctk.CTkComboBox(
             self.center_frame,
-            textvariable=self.load_mode,
+            variable=self.load_mode,
             values=["Default", "By Author", "By Genre", "By Topic", "By Genre & Topic"],
-            state="readonly",
-            width=15
+            command=self.on_mode_change,
+            width=160
         )
 
-        mode_dropdown.grid(row=0, column=3)
-        mode_dropdown.bind('<<ComboboxSelected>>', self.on_mode_change)
+        mode_dropdown.grid(row=0, column=3, padx=(0, 6), pady=4)
 
         # Author Filter
         self.author_filter_var = tk.StringVar()
-        self.author_filter = ttk.Combobox(
+        self.author_filter = ctk.CTkComboBox(
             self.center_frame,
-            textvariable=self.author_filter_var,
-            state="readonly"
+            variable=self.author_filter_var,
+            width=180
         )
-        self.author_filter.grid(row=0, column=6)
+        self.author_filter.grid(row=0, column=6, padx=(0, 6), pady=4)
         self.author_filter.grid_forget()  # hidden initially
 
         # Genre Filter
         self.genre_filter_var = tk.StringVar()
-        self.genre_filter = ttk.Combobox(
+        self.genre_filter = ctk.CTkComboBox(
             self.center_frame,
-            textvariable=self.genre_filter_var,
-            state="readonly"
+            variable=self.genre_filter_var,
+            width=180
         )
-        self.genre_filter.grid(row=0, column=7)
+        self.genre_filter.grid(row=0, column=7, padx=(0, 6), pady=4)
         self.genre_filter.grid_forget()
 
         # Topic Filter
         self.topic_filter_var = tk.StringVar()
-        self.topic_filter = ttk.Combobox(
+        self.topic_filter = ctk.CTkComboBox(
             self.center_frame,
-            textvariable=self.topic_filter_var,
-            state="readonly"
+            variable=self.topic_filter_var,
+            width=180
         )
-        self.topic_filter.grid(row=0, column=8)
+        self.topic_filter.grid(row=0, column=8, padx=(0, 6), pady=4)
         self.topic_filter.grid_forget()
 
-        tk.Button(
+        ctk.CTkButton(
             self.center_frame,
             text="Edit Selected",
-            command=self.open_selected_edit
-        ).grid(row=0, column=999, padx=5)
+            command=self.open_selected_edit,
+            height=28,
+            fg_color="#1f6feb",
+            hover_color="#388bfd"
+        ).grid(row=0, column=999, padx=5, pady=4)
 
-        tk.Button(
+        ctk.CTkButton(
             self.center_frame,
             text="Load Books",
-            command=self.load_books
-        ).grid(row=0, column=1000)
+            command=self.load_books,
+            height=28,
+            fg_color="#238636",
+            hover_color="#2ea043"
+        ).grid(row=0, column=1000, padx=5, pady=4)
 
         # =========================
         # TABLE
@@ -225,7 +227,7 @@ class MyBookManager:
             for author_id, first, last in authors
         }
         print(self.author_map)
-        self.author_filter["values"] = list(self.author_map.keys())
+        self.author_filter.configure(values=list(self.author_map.keys()))
 
     def load_genres_into_filter(self):
         genres = db_get.get_genres_titles()
@@ -234,7 +236,7 @@ class MyBookManager:
             f"{title}":genre_id
             for genre_id, title in genres
         }
-        self.genre_filter["values"] = list(self.genre_map.keys())
+        self.genre_filter.configure(values=list(self.genre_map.keys()))
         print(self.genre_map)
 
     def load_topics_into_filter(self):
@@ -244,7 +246,11 @@ class MyBookManager:
             f"{name}": topic_id
             for topic_id, name in topics
         }
-        self.topic_filter["values"] = list(self.topic_map.keys())
+        self.topic_filter.configure(values=list(self.topic_map.keys()))
+
+    def on_appearance_mode_changed(self, mode=None):
+        if hasattr(self, "book_table"):
+            self.book_table.update_theme()
 
     def center_window(self, width, height):
 
@@ -308,7 +314,6 @@ if __name__ == "__main__":
     ctk.set_appearance_mode("Dark")
 
     root = ctk.CTk()
-    root.fg_color="gray20"
 
     database.create_tables()
 

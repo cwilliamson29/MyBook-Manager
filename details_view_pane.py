@@ -8,7 +8,7 @@ from db import db_get
 
 class DetailsViewPane(ctk.CTkFrame):
     def __init__(self, parent, par, app, data):
-        super().__init__(parent)
+        super().__init__(parent, fg_color="transparent")
         self.parent = parent
         self.par = par
         self.app = app
@@ -17,31 +17,27 @@ class DetailsViewPane(ctk.CTkFrame):
         self.topics = db_get.get_book_topics_names(self.book[0])
         self.topic_names = ", ".join(self.topics)
 
-        # bar = ctk.CTkFrame(self, border_color="blue", border_width=1)
-        bar = ctk.CTkFrame(self, fg_color="gray20")
+        bar = ctk.CTkFrame(self, fg_color="transparent")
         bar.pack(side="top", anchor="n", fill="x", expand=True)
         bar.columnconfigure(1, weight=1)
 
-        # details = ctk.CTkFrame(self, border_color="red", border_width=1)
-        details = ctk.CTkFrame(self, fg_color="gray20")
+        details = ctk.CTkFrame(self, fg_color="transparent")
         details.pack(side="top", anchor="n", fill="x", expand=True)
         details.columnconfigure(0, weight=1, uniform="group1")
         details.columnconfigure(1, weight=1, uniform="group1")
 
-        # col1 = ctk.CTkFrame(details, border_color="blue", border_width=1)
-        col1 = ctk.CTkFrame(details, fg_color="gray20")
+        col1 = ctk.CTkFrame(details, fg_color="transparent")
         col1.grid(row=0, column=0, sticky="nsew")
-        # col2 = ctk.CTkFrame(details, border_color="blue", border_width=1)
-        col2 = ctk.CTkFrame(details, fg_color="gray20")
+        col2 = ctk.CTkFrame(details, fg_color="transparent")
         col2.grid(row=0, column=1, sticky="nsew")
 
         close_pil = Image.open('assets/img/close_btn.png').convert('RGBA')
         close_img = ctk.CTkImage(light_image=close_pil, dark_image=close_pil, size=(16, 16))
 
-        self.edit_btn = ctk.CTkButton(bar, text="EDIT", width=50, command=lambda: self.par.edit_book(self.book[0]))
+        self.edit_btn = ctk.CTkButton(bar, text="EDIT", width=50, fg_color="#1f6feb", hover_color="#388bfd", command=lambda: self.par.edit_book(self.book[0]))
         self.edit_btn.grid(row=0, column=0, sticky="w", padx=5, pady=2)
 
-        close_btn = ctk.CTkButton(bar, image=close_img, text="", width=20, height=20, fg_color="transparent", hover_color="gray30", command=self.app.close_book)
+        close_btn = ctk.CTkButton(bar, image=close_img, text="", width=20, height=20, fg_color="transparent", hover_color=("gray80", "gray30"), command=self.app.close_book)
         close_btn.grid(row=0, column=1, sticky="e", padx=5, pady=2)
 
         pady = 0

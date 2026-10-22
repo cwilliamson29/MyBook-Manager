@@ -81,7 +81,7 @@ class CoverSearchDialog(ctk.CTkToplevel):
             header_frame,
             text="📖 Online Cover Art Search",
             font=("Arial", 18, "bold"),
-            text_color="lightblue"
+            text_color=("#0969da", "#58a6ff")
         )
         title_lbl.pack(side="top", anchor="w")
 
@@ -89,12 +89,12 @@ class CoverSearchDialog(ctk.CTkToplevel):
             header_frame,
             text="Search online catalog by Title and Author name to choose your preferred cover art.",
             font=("Arial", 12),
-            text_color="gray70"
+            text_color=("#656d76", "#8b949e")
         )
         subtitle_lbl.pack(side="top", anchor="w", pady=(2, 0))
 
         # 2. Search Inputs Panel
-        search_card = ctk.CTkFrame(self, fg_color="gray25", corner_radius=8, border_width=1, border_color="gray35")
+        search_card = ctk.CTkFrame(self, fg_color=("#ffffff", "#21262d"), corner_radius=8, border_width=1, border_color=("#d0d7de", "#30363d"))
         search_card.pack(side="top", fill="x", padx=20, pady=(0, 10))
 
         input_grid = ctk.CTkFrame(search_card, fg_color="transparent")
@@ -145,7 +145,7 @@ class CoverSearchDialog(ctk.CTkToplevel):
             self.status_frame,
             text="Ready to search.",
             font=("Arial", 12),
-            text_color="gray80"
+            text_color=("#1f2328", "gray80")
         )
         self.status_label.pack(side="left", anchor="w")
 
@@ -155,10 +155,10 @@ class CoverSearchDialog(ctk.CTkToplevel):
         # 4. Results Display Area
         self.results_scroll = ctk.CTkScrollableFrame(
             self,
-            fg_color="gray20",
+            fg_color=("#f6f8fa", "#161b22"),
             corner_radius=8,
             border_width=1,
-            border_color="gray30"
+            border_color=("#d0d7de", "#30363d")
         )
         self.results_scroll.pack(side="top", fill="both", expand=True, padx=20, pady=(0, 10))
 
@@ -167,7 +167,7 @@ class CoverSearchDialog(ctk.CTkToplevel):
             self.results_scroll,
             text="Enter book title and author above, then click Search to view cover choices.",
             font=("Arial", 13),
-            text_color="gray60"
+            text_color=("#656d76", "gray60")
         )
         self.empty_label.pack(side="top", pady=60)
 
@@ -181,8 +181,9 @@ class CoverSearchDialog(ctk.CTkToplevel):
             width=90,
             height=30,
             font=("Arial", 12),
-            fg_color="gray40",
-            hover_color="gray50",
+            fg_color=("#e1e4e8", "#30363d"),
+            hover_color=("#d0d7de", "#484f58"),
+            text_color=("#1f2328", "#f0f6fc"),
             command=self.on_close
         )
         self.close_btn.pack(side="right")
@@ -293,10 +294,10 @@ class CoverSearchDialog(ctk.CTkToplevel):
     def _render_result_card(self, parent, item, col_idx):
         card = ctk.CTkFrame(
             parent,
-            fg_color="gray25",
+            fg_color=("#ffffff", "#21262d"),
             corner_radius=8,
             border_width=1,
-            border_color="gray35"
+            border_color=("#d0d7de", "#30363d")
         )
         card.grid(row=0, column=col_idx, sticky="nsew", padx=6, pady=4)
 
@@ -341,7 +342,7 @@ class CoverSearchDialog(ctk.CTkToplevel):
                 card,
                 text=display_author,
                 font=("Arial", 10),
-                text_color="gray80",
+                text_color=("#656d76", "gray80"),
                 wraplength=190,
                 justify="center"
             )
@@ -359,7 +360,7 @@ class CoverSearchDialog(ctk.CTkToplevel):
                 card,
                 text=meta_text,
                 font=("Arial", 9, "italic"),
-                text_color="gray60"
+                text_color=("#656d76", "gray60")
             )
             meta_lbl.pack(side="top", padx=8, pady=(0, 2))
 
@@ -370,7 +371,7 @@ class CoverSearchDialog(ctk.CTkToplevel):
                 card,
                 text=f"ISBN: {item_isbn}",
                 font=("Arial", 10, "bold"),
-                text_color="lightblue"
+                text_color=("#0969da", "#58a6ff")
             )
             isbn_lbl.pack(side="top", padx=8, pady=(0, 4))
 

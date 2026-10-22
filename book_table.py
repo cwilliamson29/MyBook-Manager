@@ -1,12 +1,13 @@
 import tkinter as tk
 from tkinter import ttk, messagebox
+import customtkinter as ctk
 from db import db_get, db_update
 
 
-class BookTable(tk.Frame):
+class BookTable(ctk.CTkFrame):
 
     def __init__(self, parent, app):
-        super().__init__(parent)
+        super().__init__(parent, fg_color="transparent")
 
         self.parent = parent
         self.app = app
@@ -14,10 +15,6 @@ class BookTable(tk.Frame):
         # Scrollbar
         scrollbar = ttk.Scrollbar(self)
         scrollbar.pack(side="right", fill="y")
-
-        style = ttk.Style()
-        style.configure("Treeview", rowheight=28, font=("Arial", 12), borderwidth=5, relief="solid")
-        style.configure("Treeview.Heading", font=("Arial", 10, "bold"), borderwidth=5, relief="solid", border_width=5)
 
         # Treeview
         self.tree = ttk.Treeview(
@@ -28,6 +25,9 @@ class BookTable(tk.Frame):
         )
 
         scrollbar.config(command=self.tree.yview)
+
+        # Apply initial theme
+        self.update_theme()
 
         # Headings
         self.tree.heading("Delete", text="🗑️", anchor="center")
@@ -53,7 +53,7 @@ class BookTable(tk.Frame):
         self.tree.column("ISBN", width=100, stretch=False)
         self.tree.column("NLS Order", width=100)
 
-        self.genre_tags ={}
+        self.genre_tags = {}
 
         self.tree.bind("<Button-1>", self.on_click)
         self.tree.bind("<<TreeviewSelect>>", self.on_book_selected)
@@ -76,6 +76,68 @@ class BookTable(tk.Frame):
 
         self.tree.pack(fill="both", expand=True, pady=2)
 
+    def update_theme(self):
+        """Updates ttk Treeview colors and styles to match the current appearance mode."""
+        mode = ctk.get_appearance_mode()
+        style = ttk.Style()
+
+        try:
+            if "clam" in style.theme_names():
+                style.theme_use("clam")
+        except Exception:
+            pass
+
+        if mode == "Dark":
+            bg = "#161b22"
+            fg = "#f0f6fc"
+            field_bg = "#161b22"
+            heading_bg = "#21262d"
+            heading_fg = "#f0f6fc"
+            odd_bg = "#1f242c"
+            even_bg = "#161b22"
+            select_bg = "#1f6feb"
+            select_fg = "#ffffff"
+        else:
+            bg = "#ffffff"
+            fg = "#1f2328"
+            field_bg = "#ffffff"
+            heading_bg = "#f6f8fa"
+            heading_fg = "#1f2328"
+            odd_bg = "#f0f2f5"
+            even_bg = "#ffffff"
+            select_bg = "#0969da"
+            select_fg = "#ffffff"
+
+        style.configure(
+            "Treeview",
+            background=bg,
+            foreground=fg,
+            fieldbackground=field_bg,
+            rowheight=28,
+            font=("Arial", 12),
+            borderwidth=0
+        )
+        style.map(
+            "Treeview",
+            background=[("selected", select_bg)],
+            foreground=[("selected", select_fg)]
+        )
+        style.configure(
+            "Treeview.Heading",
+            background=heading_bg,
+            foreground=heading_fg,
+            font=("Arial", 10, "bold"),
+            borderwidth=1,
+            relief="flat"
+        )
+        style.map(
+            "Treeview.Heading",
+            background=[("active", heading_bg)]
+        )
+
+        self.tree.tag_configure("oddrow", background=odd_bg, foreground=fg)
+        self.tree.tag_configure("evenrow", background=even_bg, foreground=fg)
+
     def load_books(self):
 
         # Clear existing rows
@@ -91,8 +153,7 @@ class BookTable(tk.Frame):
 
 
     def populate_table(self, books):
-        self.tree.tag_configure("oddrow", background="#cccccc", foreground="black")
-        self.tree.tag_configure("evenrow", background="white", foreground="black")
+        self.update_theme()
         # Genre Tags
         self.genre_tags = db_get.get_genres()
         genre_color_map = {}

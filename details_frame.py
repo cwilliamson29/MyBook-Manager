@@ -29,13 +29,13 @@ class DetailsFrame(ctk.CTkFrame):
         self.grid_columnconfigure(3, weight=1)
 
         # Left frame for cover image and upload/remove controls
-        self.left_frame = ctk.CTkFrame(self, width=180, fg_color="gray20")
+        self.left_frame = ctk.CTkFrame(self, width=180, fg_color=("gray88", "gray20"), corner_radius=8)
         self.left_frame.pack(side="left", anchor="n", padx=(10, 5), pady=8, expand=False)
 
-        self.center_frame_details = ctk.CTkFrame(self, fg_color="gray20")
-        self.center_frame_details.pack(side="left", anchor="n", fill="x", expand=True)
+        self.center_frame_details = ctk.CTkFrame(self, fg_color=("gray88", "gray20"), corner_radius=8)
+        self.center_frame_details.pack(side="left", anchor="n", fill="x", expand=True, pady=8)
 
-        self.right_frame = ctk.CTkFrame(self, width=20, fg_color="gray20")
+        self.right_frame = ctk.CTkFrame(self, width=20, fg_color="transparent")
         self.right_frame.pack(side="right", anchor="ne")
 
         # Cover image display label (clickable to upload)

@@ -21,6 +21,20 @@ from windows.settings_helpers.cover_fetcher import batch_fetch_covers_for_missin
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 DB_PATH = PROJECT_ROOT / DB_NAME if not Path(DB_NAME).is_absolute() else Path(DB_NAME)
 
+# Theme Palette Constants (Light Mode, Dark Mode)
+CARD_BG = ("#ffffff", "#21262d")
+CARD_BORDER = ("#d0d7de", "#30363d")
+INNER_BG = ("#f6f8fa", "#161b22")
+INNER_BORDER = ("#d0d7de", "#30363d")
+HEADER_BG = ("#f6f8fa", "#161b22")
+TEXT_PRIMARY = ("#1f2328", "#f0f6fc")
+TEXT_MUTED = ("#656d76", "#8b949e") #656d76
+TEXT_ACCENT = ("#0969da", "#58a6ff")
+BTN_SECONDARY_BG = ("#e1e4e8", "#21262d")
+BTN_SECONDARY_HOVER = ("#d0d7de", "#30363d")
+BTN_SECONDARY_BORDER = ("#d0d7de", "#30363d")
+BTN_SECONDARY_TEXT = ("#1f2328", "#f0f6fc") #f0f6fc
+
 
 class SettingsWindow(ctk.CTkToplevel):
     def __init__(self, app):
@@ -40,16 +54,16 @@ class SettingsWindow(ctk.CTkToplevel):
 
         # Style dictionary
         self.card_style = {
-            "fg_color": "#21262d",
+            "fg_color": CARD_BG,
             "corner_radius": 8,
             "border_width": 1,
-            "border_color": "#30363d"
+            "border_color": CARD_BORDER
         }
 
         # -------------------------------------------------------------
         # Header Banner
         # -------------------------------------------------------------
-        header_frame = ctk.CTkFrame(self, fg_color="#161b22", corner_radius=0, height=65)
+        header_frame = ctk.CTkFrame(self, fg_color=HEADER_BG, corner_radius=0, height=65)
         header_frame.pack(side="top", fill="x", anchor="n")
         header_frame.pack_propagate(False)
 
@@ -60,7 +74,7 @@ class SettingsWindow(ctk.CTkToplevel):
             title_box,
             text="Application Settings",
             font=("Arial", 16, "bold"),
-            text_color="#f0f6fc"
+            text_color=TEXT_PRIMARY
         )
         title_label.pack(anchor="w")
 
@@ -68,14 +82,14 @@ class SettingsWindow(ctk.CTkToplevel):
             title_box,
             text="Database management, author & series editing, and preferences",
             font=("Arial", 11),
-            text_color="#8b949e"
+            text_color=TEXT_MUTED
         )
         subtitle_label.pack(anchor="w")
 
         # -------------------------------------------------------------
         # Footer Action Bar (built first so status_label is available)
         # -------------------------------------------------------------
-        footer_frame = ctk.CTkFrame(self, fg_color="#161b22", corner_radius=0, height=45)
+        footer_frame = ctk.CTkFrame(self, fg_color=HEADER_BG, corner_radius=0, height=45)
         footer_frame.pack(side="bottom", fill="x")
         footer_frame.pack_propagate(False)
 
@@ -83,7 +97,7 @@ class SettingsWindow(ctk.CTkToplevel):
             footer_frame,
             text="Ready",
             font=("Arial", 11),
-            text_color="#8b949e"
+            text_color=TEXT_MUTED
         )
         self.status_label.pack(side="left", padx=16, pady=8)
 
@@ -92,8 +106,11 @@ class SettingsWindow(ctk.CTkToplevel):
             text="Close",
             width=80,
             height=28,
-            fg_color="#30363d",
-            hover_color="#484f58",
+            fg_color=BTN_SECONDARY_BG,
+            hover_color=BTN_SECONDARY_HOVER,
+            border_color=BTN_SECONDARY_BORDER,
+            border_width=1,
+            text_color=BTN_SECONDARY_TEXT,
             font=("Arial", 12),
             command=self.on_close
         )
@@ -104,12 +121,12 @@ class SettingsWindow(ctk.CTkToplevel):
         # -------------------------------------------------------------
         self.tabview = ctk.CTkTabview(
             self,
-            fg_color="#0d1117",
-            segmented_button_fg_color="#161b22",
-            segmented_button_selected_color="#1f6feb",
-            segmented_button_selected_hover_color="#388bfd",
-            segmented_button_unselected_color="#21262d",
-            segmented_button_unselected_hover_color="#30363d",
+            fg_color=("#f0f2f5", "#0d1117"),
+            segmented_button_fg_color=("#979DA2", "gray29"),
+            segmented_button_selected_color=("#1f6feb", "#1f6feb"),
+            segmented_button_selected_hover_color=("#388bfd", "#388bfd"),
+            segmented_button_unselected_color=("#979DA2", "gray29"),
+            segmented_button_unselected_hover_color=("gray70", "gray41"),
             corner_radius=8
         )
         self.tabview.pack(fill="both", expand=True, padx=14, pady=(6, 4))
@@ -147,7 +164,7 @@ class SettingsWindow(ctk.CTkToplevel):
             header_row,
             text="Database Status & Statistics",
             font=("Arial", 13, "bold"),
-            text_color="#f0f6fc"
+            text_color=TEXT_PRIMARY
         ).pack(side="left")
 
         refresh_btn = ctk.CTkButton(
@@ -156,10 +173,11 @@ class SettingsWindow(ctk.CTkToplevel):
             width=60,
             height=22,
             font=("Arial", 11),
-            fg_color="#21262d",
-            hover_color="#30363d",
+            fg_color=BTN_SECONDARY_BG,
+            hover_color=BTN_SECONDARY_HOVER,
             border_width=1,
-            border_color="#30363d",
+            border_color=BTN_SECONDARY_BORDER,
+            text_color=BTN_SECONDARY_TEXT,
             command=self.refresh_stats
         )
         refresh_btn.pack(side="right")
@@ -181,13 +199,13 @@ class SettingsWindow(ctk.CTkToplevel):
         ]
 
         for label_text, key, row, col in items:
-            tile = ctk.CTkFrame(self.stats_grid, fg_color="#161b22", corner_radius=6, border_width=1, border_color="#30363d")
+            tile = ctk.CTkFrame(self.stats_grid, fg_color=INNER_BG, corner_radius=6, border_width=1, border_color=INNER_BORDER)
             tile.grid(row=row, column=col, padx=4, pady=4, sticky="nsew")
 
-            val_lbl = ctk.CTkLabel(tile, text="--", font=("Arial", 14, "bold"), text_color="#58a6ff")
+            val_lbl = ctk.CTkLabel(tile, text="--", font=("Arial", 14, "bold"), text_color=TEXT_ACCENT)
             val_lbl.pack(pady=(4, 0))
 
-            sub_lbl = ctk.CTkLabel(tile, text=label_text, font=("Arial", 10), text_color="#8b949e")
+            sub_lbl = ctk.CTkLabel(tile, text=label_text, font=("Arial", 10), text_color=TEXT_MUTED)
             sub_lbl.pack(pady=(0, 4))
 
             self.stat_labels[key] = val_lbl
@@ -200,14 +218,14 @@ class SettingsWindow(ctk.CTkToplevel):
             ops_card,
             text="Backup & Restore",
             font=("Arial", 13, "bold"),
-            text_color="#f0f6fc"
+            text_color=TEXT_PRIMARY
         ).pack(anchor="w", padx=12, pady=(10, 2))
 
         ctk.CTkLabel(
             ops_card,
             text="Safely duplicate or restore your SQLite database records.",
             font=("Arial", 11),
-            text_color="#8b949e"
+            text_color=TEXT_MUTED
         ).pack(anchor="w", padx=12, pady=(0, 8))
 
         btn_row = ctk.CTkFrame(ops_card, fg_color="transparent")
@@ -231,10 +249,11 @@ class SettingsWindow(ctk.CTkToplevel):
             btn_row,
             text="Quick Snapshot",
             font=("Arial", 12),
-            fg_color="#21262d",
-            hover_color="#30363d",
+            fg_color=BTN_SECONDARY_BG,
+            hover_color=BTN_SECONDARY_HOVER,
             border_width=1,
-            border_color="#30363d",
+            border_color=BTN_SECONDARY_BORDER,
+            text_color=BTN_SECONDARY_TEXT,
             height=32,
             command=self.handle_quick_backup
         )
@@ -265,14 +284,14 @@ class SettingsWindow(ctk.CTkToplevel):
             maint_text_box,
             text="Database Optimization",
             font=("Arial", 13, "bold"),
-            text_color="#f0f6fc"
+            text_color=TEXT_PRIMARY
         ).pack(anchor="w")
 
         ctk.CTkLabel(
             maint_text_box,
             text="Defragment SQLite file, rebuild query indexes, and reclaim space.",
             font=("Arial", 11),
-            text_color="#8b949e"
+            text_color=TEXT_MUTED
         ).pack(anchor="w")
 
         vacuum_btn = ctk.CTkButton(
@@ -316,14 +335,14 @@ class SettingsWindow(ctk.CTkToplevel):
             info_box,
             text="Author & Series Editor",
             font=("Arial", 13, "bold"),
-            text_color="#f0f6fc"
+            text_color=TEXT_PRIMARY
         ).pack(anchor="w")
 
         ctk.CTkLabel(
             info_box,
             text="Edit existing author names and series titles across your library.",
             font=("Arial", 11),
-            text_color="#8b949e"
+            text_color=TEXT_MUTED
         ).pack(anchor="w")
 
         self.as_mode_var = ctk.StringVar(value="Authors")
@@ -332,11 +351,12 @@ class SettingsWindow(ctk.CTkToplevel):
             values=["Authors", "Series"],
             variable=self.as_mode_var,
             command=self.switch_authors_series_view,
-            fg_color="#161b22",
+            fg_color=INNER_BG,
             selected_color="#1f6feb",
             selected_hover_color="#388bfd",
-            unselected_color="#21262d",
-            unselected_hover_color="#30363d",
+            unselected_color=CARD_BG,
+            unselected_hover_color=BTN_SECONDARY_HOVER,
+            text_color=TEXT_PRIMARY,
             font=("Arial", 11, "bold"),
             width=150,
             height=28
@@ -370,7 +390,7 @@ class SettingsWindow(ctk.CTkToplevel):
             sel_header,
             text="Select Author to Edit",
             font=("Arial", 13, "bold"),
-            text_color="#f0f6fc"
+            text_color=TEXT_PRIMARY
         ).pack(side="left")
 
         reload_btn = ctk.CTkButton(
@@ -379,10 +399,11 @@ class SettingsWindow(ctk.CTkToplevel):
             width=60,
             height=22,
             font=("Arial", 11),
-            fg_color="#21262d",
-            hover_color="#30363d",
+            fg_color=BTN_SECONDARY_BG,
+            hover_color=BTN_SECONDARY_HOVER,
             border_width=1,
-            border_color="#30363d",
+            border_color=BTN_SECONDARY_BORDER,
+            text_color=BTN_SECONDARY_TEXT,
             command=self.refresh_authors_dropdown
         )
         reload_btn.pack(side="right")
@@ -411,14 +432,14 @@ class SettingsWindow(ctk.CTkToplevel):
             edit_card,
             text="Edit Author Details",
             font=("Arial", 13, "bold"),
-            text_color="#f0f6fc"
+            text_color=TEXT_PRIMARY
         ).pack(anchor="w", padx=12, pady=(10, 2))
 
         ctk.CTkLabel(
             edit_card,
             text="Changes will update author metadata across all associated books and series.",
             font=("Arial", 11),
-            text_color="#8b949e"
+            text_color=TEXT_MUTED
         ).pack(anchor="w", padx=12, pady=(0, 10))
 
         # Fields Form Grid
@@ -426,11 +447,11 @@ class SettingsWindow(ctk.CTkToplevel):
         form_frame.pack(fill="x", padx=12, pady=4)
         form_frame.columnconfigure(1, weight=1)
 
-        ctk.CTkLabel(form_frame, text="First Name:", font=("Arial", 12, "bold"), text_color="#f0f6fc", anchor="w").grid(row=0, column=0, padx=(0, 10), pady=6, sticky="w")
+        ctk.CTkLabel(form_frame, text="First Name:", font=("Arial", 12, "bold"), text_color=TEXT_PRIMARY, anchor="w").grid(row=0, column=0, padx=(0, 10), pady=6, sticky="w")
         self.author_first_entry = ctk.CTkEntry(form_frame, font=("Arial", 12), height=32, corner_radius=6)
         self.author_first_entry.grid(row=0, column=1, sticky="ew", pady=6)
 
-        ctk.CTkLabel(form_frame, text="Last Name:", font=("Arial", 12, "bold"), text_color="#f0f6fc", anchor="w").grid(row=1, column=0, padx=(0, 10), pady=6, sticky="w")
+        ctk.CTkLabel(form_frame, text="Last Name:", font=("Arial", 12, "bold"), text_color=TEXT_PRIMARY, anchor="w").grid(row=1, column=0, padx=(0, 10), pady=6, sticky="w")
         self.author_last_entry = ctk.CTkEntry(form_frame, font=("Arial", 12), height=32, corner_radius=6)
         self.author_last_entry.grid(row=1, column=1, sticky="ew", pady=6)
 
@@ -440,12 +461,12 @@ class SettingsWindow(ctk.CTkToplevel):
         metrics_frame.columnconfigure(0, weight=1)
         metrics_frame.columnconfigure(1, weight=1)
 
-        b_tile = ctk.CTkFrame(metrics_frame, fg_color="#161b22", corner_radius=6, border_width=1, border_color="#30363d")
+        b_tile = ctk.CTkFrame(metrics_frame, fg_color=INNER_BG, corner_radius=6, border_width=1, border_color=INNER_BORDER)
         b_tile.grid(row=0, column=0, padx=(0, 4), sticky="nsew")
-        self.author_books_badge = ctk.CTkLabel(b_tile, text="0 Books", font=("Arial", 12, "bold"), text_color="#58a6ff")
+        self.author_books_badge = ctk.CTkLabel(b_tile, text="0 Books", font=("Arial", 12, "bold"), text_color=TEXT_ACCENT)
         self.author_books_badge.pack(pady=6)
 
-        s_tile = ctk.CTkFrame(metrics_frame, fg_color="#161b22", corner_radius=6, border_width=1, border_color="#30363d")
+        s_tile = ctk.CTkFrame(metrics_frame, fg_color=INNER_BG, corner_radius=6, border_width=1, border_color=INNER_BORDER)
         s_tile.grid(row=0, column=1, padx=(4, 0), sticky="nsew")
         self.author_series_badge = ctk.CTkLabel(s_tile, text="0 Series", font=("Arial", 12, "bold"), text_color="#a371f7")
         self.author_series_badge.pack(pady=6)
@@ -480,10 +501,11 @@ class SettingsWindow(ctk.CTkToplevel):
             btn_row,
             text="Reset",
             font=("Arial", 12),
-            fg_color="#21262d",
-            hover_color="#30363d",
+            fg_color=BTN_SECONDARY_BG,
+            hover_color=BTN_SECONDARY_HOVER,
             border_width=1,
-            border_color="#30363d",
+            border_color=BTN_SECONDARY_BORDER,
+            text_color=BTN_SECONDARY_TEXT,
             height=34,
             command=self.revert_author_changes
         )
@@ -515,7 +537,7 @@ class SettingsWindow(ctk.CTkToplevel):
             sel_header,
             text="Select Series to Edit",
             font=("Arial", 13, "bold"),
-            text_color="#f0f6fc"
+            text_color=TEXT_PRIMARY
         ).pack(side="left")
 
         reload_btn = ctk.CTkButton(
@@ -524,10 +546,11 @@ class SettingsWindow(ctk.CTkToplevel):
             width=60,
             height=22,
             font=("Arial", 11),
-            fg_color="#21262d",
-            hover_color="#30363d",
+            fg_color=BTN_SECONDARY_BG,
+            hover_color=BTN_SECONDARY_HOVER,
             border_width=1,
-            border_color="#30363d",
+            border_color=BTN_SECONDARY_BORDER,
+            text_color=BTN_SECONDARY_TEXT,
             command=self.refresh_series_dropdown
         )
         reload_btn.pack(side="right")
@@ -556,14 +579,14 @@ class SettingsWindow(ctk.CTkToplevel):
             edit_card,
             text="Edit Series Details",
             font=("Arial", 13, "bold"),
-            text_color="#f0f6fc"
+            text_color=TEXT_PRIMARY
         ).pack(anchor="w", padx=12, pady=(10, 2))
 
         ctk.CTkLabel(
             edit_card,
             text="Update series title or reassign its primary author association.",
             font=("Arial", 11),
-            text_color="#8b949e"
+            text_color=TEXT_MUTED
         ).pack(anchor="w", padx=12, pady=(0, 10))
 
         # Fields Form Grid
@@ -571,11 +594,11 @@ class SettingsWindow(ctk.CTkToplevel):
         form_frame.pack(fill="x", padx=12, pady=4)
         form_frame.columnconfigure(1, weight=1)
 
-        ctk.CTkLabel(form_frame, text="Series Title:", font=("Arial", 12, "bold"), text_color="#f0f6fc", anchor="w").grid(row=0, column=0, padx=(0, 10), pady=6, sticky="w")
+        ctk.CTkLabel(form_frame, text="Series Title:", font=("Arial", 12, "bold"), text_color=TEXT_PRIMARY, anchor="w").grid(row=0, column=0, padx=(0, 10), pady=6, sticky="w")
         self.series_title_entry = ctk.CTkEntry(form_frame, font=("Arial", 12), height=32, corner_radius=6)
         self.series_title_entry.grid(row=0, column=1, sticky="ew", pady=6)
 
-        ctk.CTkLabel(form_frame, text="Author:", font=("Arial", 12, "bold"), text_color="#f0f6fc", anchor="w").grid(row=1, column=0, padx=(0, 10), pady=6, sticky="w")
+        ctk.CTkLabel(form_frame, text="Author:", font=("Arial", 12, "bold"), text_color=TEXT_PRIMARY, anchor="w").grid(row=1, column=0, padx=(0, 10), pady=6, sticky="w")
         self.series_author_var = ctk.StringVar()
         self.series_author_combo = ctk.CTkComboBox(
             form_frame,
@@ -593,9 +616,9 @@ class SettingsWindow(ctk.CTkToplevel):
         metrics_frame.pack(fill="x", padx=12, pady=8)
         metrics_frame.columnconfigure(0, weight=1)
 
-        b_tile = ctk.CTkFrame(metrics_frame, fg_color="#161b22", corner_radius=6, border_width=1, border_color="#30363d")
+        b_tile = ctk.CTkFrame(metrics_frame, fg_color=INNER_BG, corner_radius=6, border_width=1, border_color=INNER_BORDER)
         b_tile.grid(row=0, column=0, padx=0, sticky="nsew")
-        self.series_books_badge = ctk.CTkLabel(b_tile, text="0 Books in Series", font=("Arial", 12, "bold"), text_color="#58a6ff")
+        self.series_books_badge = ctk.CTkLabel(b_tile, text="0 Books in Series", font=("Arial", 12, "bold"), text_color=TEXT_ACCENT)
         self.series_books_badge.pack(pady=6)
 
         # Feedback message
@@ -628,10 +651,11 @@ class SettingsWindow(ctk.CTkToplevel):
             btn_row,
             text="Reset",
             font=("Arial", 12),
-            fg_color="#21262d",
-            hover_color="#30363d",
+            fg_color=BTN_SECONDARY_BG,
+            hover_color=BTN_SECONDARY_HOVER,
             border_width=1,
-            border_color="#30363d",
+            border_color=BTN_SECONDARY_BORDER,
+            text_color=BTN_SECONDARY_TEXT,
             height=34,
             command=self.revert_series_changes
         )
@@ -936,14 +960,14 @@ class SettingsWindow(ctk.CTkToplevel):
             title_box,
             text="Genre Color & Label Editor",
             font=("Arial", 13, "bold"),
-            text_color="#f0f6fc"
+            text_color=TEXT_PRIMARY
         ).pack(anchor="w")
 
         ctk.CTkLabel(
             title_box,
             text="Customize the highlight color and display title for each genre.",
             font=("Arial", 11),
-            text_color="#8b949e"
+            text_color=TEXT_MUTED
         ).pack(anchor="w")
 
         reload_btn = ctk.CTkButton(
@@ -952,10 +976,11 @@ class SettingsWindow(ctk.CTkToplevel):
             width=60,
             height=22,
             font=("Arial", 11),
-            fg_color="#21262d",
-            hover_color="#30363d",
+            fg_color=BTN_SECONDARY_BG,
+            hover_color=BTN_SECONDARY_HOVER,
             border_width=1,
-            border_color="#30363d",
+            border_color=BTN_SECONDARY_BORDER,
+            text_color=BTN_SECONDARY_TEXT,
             command=self.refresh_genres_dropdown
         )
         reload_btn.pack(side="right")
@@ -984,7 +1009,7 @@ class SettingsWindow(ctk.CTkToplevel):
             edit_card,
             text="Color & Label Settings",
             font=("Arial", 13, "bold"),
-            text_color="#f0f6fc"
+            text_color=TEXT_PRIMARY
         ).pack(anchor="w", padx=12, pady=(10, 2))
 
         # Fields Form Grid
@@ -993,13 +1018,13 @@ class SettingsWindow(ctk.CTkToplevel):
         form_frame.columnconfigure(1, weight=1)
 
         # Title Field
-        ctk.CTkLabel(form_frame, text="Genre Title:", font=("Arial", 12, "bold"), text_color="#f0f6fc", anchor="w").grid(row=0, column=0, padx=(0, 10), pady=4, sticky="w")
+        ctk.CTkLabel(form_frame, text="Genre Title:", font=("Arial", 12, "bold"), text_color=TEXT_PRIMARY, anchor="w").grid(row=0, column=0, padx=(0, 10), pady=4, sticky="w")
         self.genre_title_entry = ctk.CTkEntry(form_frame, font=("Arial", 12), height=30, corner_radius=6)
         self.genre_title_entry.grid(row=0, column=1, sticky="ew", pady=4)
         self.genre_title_entry.bind("<KeyRelease>", lambda e: self.update_color_preview())
 
         # Color Hex Code Field + Pick Button
-        ctk.CTkLabel(form_frame, text="Hex Color:", font=("Arial", 12, "bold"), text_color="#f0f6fc", anchor="w").grid(row=1, column=0, padx=(0, 10), pady=4, sticky="w")
+        ctk.CTkLabel(form_frame, text="Hex Color:", font=("Arial", 12, "bold"), text_color=TEXT_PRIMARY, anchor="w").grid(row=1, column=0, padx=(0, 10), pady=4, sticky="w")
 
         color_input_box = ctk.CTkFrame(form_frame, fg_color="transparent")
         color_input_box.grid(row=1, column=1, sticky="ew", pady=4)
@@ -1024,10 +1049,10 @@ class SettingsWindow(ctk.CTkToplevel):
         # Visual Table Row Highlight Preview Card
         self.genre_preview_frame = ctk.CTkFrame(
             edit_card,
-            fg_color="#21262d",
+            fg_color=INNER_BG,
             corner_radius=6,
             border_width=1,
-            border_color="#30363d",
+            border_color=INNER_BORDER,
             height=34
         )
         self.genre_preview_frame.pack(fill="x", padx=12, pady=6)
@@ -1037,7 +1062,7 @@ class SettingsWindow(ctk.CTkToplevel):
             self.genre_preview_frame,
             text="📖 Table Row Preview",
             font=("Arial", 12, "bold"),
-            text_color="#8b949e"
+            text_color=TEXT_MUTED
         )
         self.genre_preview_label.pack(expand=True)
 
@@ -1049,7 +1074,7 @@ class SettingsWindow(ctk.CTkToplevel):
             palette_box,
             text="Quick Color Palette:",
             font=("Arial", 11, "bold"),
-            text_color="#8b949e"
+            text_color=TEXT_MUTED
         ).pack(anchor="w", pady=(0, 4))
 
         palette_grid = ctk.CTkFrame(palette_box, fg_color="transparent")
@@ -1095,8 +1120,11 @@ class SettingsWindow(ctk.CTkToplevel):
             clear_row,
             text="✕ Clear Color (Reset to Alternating Rows)",
             font=("Arial", 11),
-            fg_color="#30363d",
-            hover_color="#484f58",
+            fg_color=BTN_SECONDARY_BG,
+            hover_color=BTN_SECONDARY_HOVER,
+            border_width=1,
+            border_color=BTN_SECONDARY_BORDER,
+            text_color=BTN_SECONDARY_TEXT,
             height=24,
             command=lambda: self.set_selected_color("")
         )
@@ -1106,7 +1134,7 @@ class SettingsWindow(ctk.CTkToplevel):
             clear_row,
             text="0 Books Assigned",
             font=("Arial", 11, "bold"),
-            text_color="#58a6ff"
+            text_color=TEXT_ACCENT
         )
         self.genre_books_badge.pack(side="right")
 
@@ -1140,8 +1168,11 @@ class SettingsWindow(ctk.CTkToplevel):
             action_row,
             text="Reset",
             font=("Arial", 12),
-            fg_color="#30363d",
-            hover_color="#484f58",
+            fg_color=BTN_SECONDARY_BG,
+            hover_color=BTN_SECONDARY_HOVER,
+            border_width=1,
+            border_color=BTN_SECONDARY_BORDER,
+            text_color=BTN_SECONDARY_TEXT,
             height=32,
             command=self.reset_genre_form
         )
@@ -1158,22 +1189,22 @@ class SettingsWindow(ctk.CTkToplevel):
             list_header,
             text="All Genres & Color Badges",
             font=("Arial", 12, "bold"),
-            text_color="#f0f6fc"
+            text_color=TEXT_PRIMARY
         ).pack(side="left")
 
         ctk.CTkLabel(
             list_header,
             text="Click any genre to edit",
             font=("Arial", 10, "italic"),
-            text_color="#8b949e"
+            text_color=TEXT_MUTED
         ).pack(side="right")
 
         self.genres_list_scroll = ctk.CTkScrollableFrame(
             list_card,
-            fg_color="#161b22",
+            fg_color=INNER_BG,
             corner_radius=6,
             border_width=1,
-            border_color="#30363d",
+            border_color=INNER_BORDER,
             height=120
         )
         self.genres_list_scroll.pack(fill="both", expand=True, padx=12, pady=(0, 8))
@@ -1236,7 +1267,7 @@ class SettingsWindow(ctk.CTkToplevel):
                 self.genres_list_scroll,
                 text="No genres available in the database.",
                 font=("Arial", 11),
-                text_color="#8b949e"
+                text_color=TEXT_MUTED
             ).pack(pady=15)
             return
 
@@ -1246,7 +1277,7 @@ class SettingsWindow(ctk.CTkToplevel):
 
             row_frame = ctk.CTkFrame(
                 self.genres_list_scroll,
-                fg_color="#21262d",
+                fg_color=CARD_BG,
                 corner_radius=4,
                 height=28
             )
@@ -1254,7 +1285,7 @@ class SettingsWindow(ctk.CTkToplevel):
             row_frame.pack_propagate(False)
 
             # Swatch badge
-            swatch_bg = color_hex if has_color else "#30363d"
+            swatch_bg = color_hex if has_color else ("#d0d7de", "#30363d")
             swatch = ctk.CTkFrame(
                 row_frame,
                 width=16,
@@ -1262,7 +1293,7 @@ class SettingsWindow(ctk.CTkToplevel):
                 fg_color=swatch_bg,
                 corner_radius=4,
                 border_width=1 if not has_color else 0,
-                border_color="#8b949e"
+                border_color=INNER_BORDER
             )
             swatch.pack(side="left", padx=(8, 6), pady=6)
 
@@ -1270,7 +1301,7 @@ class SettingsWindow(ctk.CTkToplevel):
                 row_frame,
                 text=g_title,
                 font=("Arial", 11, "bold"),
-                text_color="#f0f6fc",
+                text_color=TEXT_PRIMARY,
                 anchor="w",
                 cursor="hand2"
             )
@@ -1280,7 +1311,7 @@ class SettingsWindow(ctk.CTkToplevel):
                 row_frame,
                 text=f"{b_count} books" if b_count != 1 else "1 book",
                 font=("Arial", 10),
-                text_color="#8b949e",
+                text_color=TEXT_MUTED,
                 cursor="hand2"
             )
             count_lbl.pack(side="right", padx=8)
@@ -1437,7 +1468,7 @@ class SettingsWindow(ctk.CTkToplevel):
             )
 
     # =========================================================================
-    # TAB 3: DATA IMPORT & COVERS
+    # TAB 4: DATA IMPORT & COVERS
     # =========================================================================
     def build_import_tab(self):
         tab = self.import_tab
@@ -1450,18 +1481,18 @@ class SettingsWindow(ctk.CTkToplevel):
             cover_card,
             text="Automatic ISBN Book Cover Retrieval",
             font=("Arial", 14, "bold"),
-            text_color="#f0f6fc"
+            text_color=TEXT_PRIMARY
         ).pack(anchor="w", padx=12, pady=(10, 2))
 
         ctk.CTkLabel(
             cover_card,
             text="Search online APIs (Open Library & Google Books) and download cover artwork for all books with an ISBN.",
             font=("Arial", 11),
-            text_color="#8b949e"
+            text_color=TEXT_MUTED
         ).pack(anchor="w", padx=12, pady=(0, 8))
 
         # Status & Count Row
-        stat_box = ctk.CTkFrame(cover_card, fg_color="#161b22", corner_radius=6, border_width=1, border_color="#30363d")
+        stat_box = ctk.CTkFrame(cover_card, fg_color=INNER_BG, corner_radius=6, border_width=1, border_color=INNER_BORDER)
         stat_box.pack(fill="x", padx=12, pady=4)
 
         stat_row = ctk.CTkFrame(stat_box, fg_color="transparent")
@@ -1471,7 +1502,7 @@ class SettingsWindow(ctk.CTkToplevel):
             stat_row,
             text="Checking books missing cover images...",
             font=("Arial", 11, "bold"),
-            text_color="#58a6ff",
+            text_color=TEXT_ACCENT,
             anchor="w"
         )
         self.missing_covers_label.pack(side="left", fill="x", expand=True)
@@ -1482,10 +1513,11 @@ class SettingsWindow(ctk.CTkToplevel):
             width=55,
             height=22,
             font=("Arial", 11),
-            fg_color="#21262d",
-            hover_color="#30363d",
+            fg_color=BTN_SECONDARY_BG,
+            hover_color=BTN_SECONDARY_HOVER,
             border_width=1,
-            border_color="#30363d",
+            border_color=BTN_SECONDARY_BORDER,
+            text_color=BTN_SECONDARY_TEXT,
             command=self.refresh_covers_stat
         )
         self.refresh_covers_btn.pack(side="right")
@@ -1499,7 +1531,7 @@ class SettingsWindow(ctk.CTkToplevel):
             cover_card,
             text="Ready to search and download missing covers.",
             font=("Arial", 10),
-            text_color="#8b949e",
+            text_color=TEXT_MUTED,
             anchor="w"
         )
         self.cover_progress_label.pack(anchor="w", padx=12, pady=(0, 6))
@@ -1541,25 +1573,25 @@ class SettingsWindow(ctk.CTkToplevel):
             excel_card,
             text="Excel Workbook Import (.xlsx, .xlsm)",
             font=("Arial", 14, "bold"),
-            text_color="#f0f6fc"
+            text_color=TEXT_PRIMARY
         ).pack(anchor="w", padx=12, pady=(10, 2))
 
         ctk.CTkLabel(
             excel_card,
             text="Import books, authors, series, and genres in bulk from spreadsheet files.",
             font=("Arial", 11),
-            text_color="#8b949e"
+            text_color=TEXT_MUTED
         ).pack(anchor="w", padx=12, pady=(0, 6))
 
         # Column Layout Specification Box
-        spec_box = ctk.CTkFrame(excel_card, fg_color="#161b22", corner_radius=6, border_width=1, border_color="#30363d")
+        spec_box = ctk.CTkFrame(excel_card, fg_color=INNER_BG, corner_radius=6, border_width=1, border_color=INNER_BORDER)
         spec_box.pack(fill="x", padx=12, pady=4)
 
         ctk.CTkLabel(
             spec_box,
             text="Expected Spreadsheet Column Format:",
             font=("Arial", 11, "bold"),
-            text_color="#58a6ff"
+            text_color=TEXT_ACCENT
         ).pack(anchor="w", padx=10, pady=(6, 2))
 
         col_items = [
@@ -1575,14 +1607,14 @@ class SettingsWindow(ctk.CTkToplevel):
             row = ctk.CTkFrame(spec_box, fg_color="transparent")
             row.pack(fill="x", padx=10, pady=1)
 
-            ctk.CTkLabel(row, text=col_name, width=80, font=("Arial", 10, "bold"), text_color="#f0f6fc", anchor="w").pack(side="left")
-            ctk.CTkLabel(row, text=col_desc, font=("Arial", 10), text_color="#8b949e", anchor="w").pack(side="left", fill="x", expand=True)
+            ctk.CTkLabel(row, text=col_name, width=80, font=("Arial", 10, "bold"), text_color=TEXT_PRIMARY, anchor="w").pack(side="left")
+            ctk.CTkLabel(row, text=col_desc, font=("Arial", 10), text_color=TEXT_MUTED, anchor="w").pack(side="left", fill="x", expand=True)
 
         ctk.CTkLabel(
             spec_box,
             text="* Note: The first row is treated as headers and automatically skipped. Relational multi-sheet workbooks are also supported.",
             font=("Arial", 9, "italic"),
-            text_color="#8b949e"
+            text_color=TEXT_MUTED
         ).pack(anchor="w", padx=10, pady=(4, 6))
 
         # Import action button
@@ -1600,7 +1632,7 @@ class SettingsWindow(ctk.CTkToplevel):
         self.refresh_covers_stat()
 
     # =========================================================================
-    # TAB 3: APPEARANCE
+    # TAB 5: APPEARANCE
     # =========================================================================
     def build_appearance_tab(self):
         tab = self.appearance_tab
@@ -1612,20 +1644,20 @@ class SettingsWindow(ctk.CTkToplevel):
             theme_card,
             text="Interface Appearance",
             font=("Arial", 13, "bold"),
-            text_color="#f0f6fc"
+            text_color=TEXT_PRIMARY
         ).pack(anchor="w", padx=12, pady=(10, 2))
 
         ctk.CTkLabel(
             theme_card,
             text="Customize the visual theme and contrast mode of the application.",
             font=("Arial", 11),
-            text_color="#8b949e"
+            text_color=TEXT_MUTED
         ).pack(anchor="w", padx=12, pady=(0, 10))
 
         mode_row = ctk.CTkFrame(theme_card, fg_color="transparent")
         mode_row.pack(fill="x", padx=12, pady=(0, 12))
 
-        ctk.CTkLabel(mode_row, text="Theme Mode:", font=("Arial", 12), text_color="#f0f6fc").pack(side="left", padx=(0, 10))
+        ctk.CTkLabel(mode_row, text="Theme Mode:", font=("Arial", 12), text_color=TEXT_PRIMARY).pack(side="left", padx=(0, 10))
 
         current_mode = ctk.get_appearance_mode()
         self.mode_var = ctk.StringVar(value=current_mode)
@@ -1634,6 +1666,12 @@ class SettingsWindow(ctk.CTkToplevel):
             mode_row,
             values=["Dark", "Light", "System"],
             variable=self.mode_var,
+            fg_color=INNER_BG,
+            selected_color="#1f6feb",
+            selected_hover_color="#388bfd",
+            unselected_color=CARD_BG,
+            unselected_hover_color=BTN_SECONDARY_HOVER,
+            text_color=TEXT_PRIMARY,
             command=self.change_appearance_mode
         )
         self.theme_segment.pack(side="left")
@@ -1646,7 +1684,7 @@ class SettingsWindow(ctk.CTkToplevel):
             tips_card,
             text="Productivity & Navigation Tips",
             font=("Arial", 13, "bold"),
-            text_color="#f0f6fc"
+            text_color=TEXT_PRIMARY
         ).pack(anchor="w", padx=12, pady=(10, 2))
 
         tips = [
@@ -1661,11 +1699,11 @@ class SettingsWindow(ctk.CTkToplevel):
             row = ctk.CTkFrame(tips_card, fg_color="transparent")
             row.pack(fill="x", padx=12, pady=3)
 
-            ctk.CTkLabel(row, text=f"•  {shortcut}:", width=120, font=("Arial", 11, "bold"), text_color="#58a6ff", anchor="w").pack(side="left")
-            ctk.CTkLabel(row, text=desc, font=("Arial", 11), text_color="#8b949e", anchor="w").pack(side="left", fill="x", expand=True)
+            ctk.CTkLabel(row, text=f"•  {shortcut}:", width=120, font=("Arial", 11, "bold"), text_color=TEXT_ACCENT, anchor="w").pack(side="left")
+            ctk.CTkLabel(row, text=desc, font=("Arial", 11), text_color=TEXT_MUTED, anchor="w").pack(side="left", fill="x", expand=True)
 
     # =========================================================================
-    # TAB 4: ABOUT & INFORMATION
+    # TAB 6: ABOUT & INFORMATION
     # =========================================================================
     def build_about_tab(self):
         tab = self.about_tab
@@ -1677,14 +1715,14 @@ class SettingsWindow(ctk.CTkToplevel):
             about_card,
             text="MyBook Manager",
             font=("Arial", 15, "bold"),
-            text_color="#f0f6fc"
+            text_color=TEXT_PRIMARY
         ).pack(anchor="w", padx=12, pady=(12, 2))
 
         ctk.CTkLabel(
             about_card,
             text="Personal library and book cataloging management system.",
             font=("Arial", 11),
-            text_color="#8b949e"
+            text_color=TEXT_MUTED
         ).pack(anchor="w", padx=12, pady=(0, 12))
 
         info_rows = [
@@ -1696,11 +1734,11 @@ class SettingsWindow(ctk.CTkToplevel):
         ]
 
         for label_text, value_text in info_rows:
-            row = ctk.CTkFrame(about_card, fg_color="#161b22", corner_radius=6, border_width=1, border_color="#30363d")
+            row = ctk.CTkFrame(about_card, fg_color=INNER_BG, corner_radius=6, border_width=1, border_color=INNER_BORDER)
             row.pack(fill="x", padx=12, pady=4)
 
-            ctk.CTkLabel(row, text=label_text, width=140, font=("Arial", 11, "bold"), text_color="#8b949e", anchor="w").pack(side="left", padx=10, pady=6)
-            ctk.CTkLabel(row, text=value_text, font=("Arial", 11), text_color="#f0f6fc", anchor="w").pack(side="left", padx=10, pady=6, fill="x", expand=True)
+            ctk.CTkLabel(row, text=label_text, width=140, font=("Arial", 11, "bold"), text_color=TEXT_MUTED, anchor="w").pack(side="left", padx=10, pady=6)
+            ctk.CTkLabel(row, text=value_text, font=("Arial", 11), text_color=TEXT_PRIMARY, anchor="w").pack(side="left", padx=10, pady=6, fill="x", expand=True)
 
     # =========================================================================
     # ACTIONS & HANDLERS
@@ -1852,6 +1890,8 @@ class SettingsWindow(ctk.CTkToplevel):
 
     def change_appearance_mode(self, new_mode):
         ctk.set_appearance_mode(new_mode)
+        if hasattr(self.app, "on_appearance_mode_changed"):
+            self.app.on_appearance_mode_changed(new_mode)
         self.status_label.configure(text=f"Appearance mode set to {new_mode}.")
 
     def on_close(self):

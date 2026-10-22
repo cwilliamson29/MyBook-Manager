@@ -1,7 +1,5 @@
 import tkinter as tk
-from tkinter import ttk
 import customtkinter as ctk
-
 
 from db import db_add, db_get
 from windows.book_tabs.add_author_tab import AuthorTab
@@ -19,52 +17,58 @@ class AddDataWindow(ctk.CTkToplevel):
 
         self.app = app
 
-        self.title("Add")
+        self.title("Add New Data")
 
-        self.center_on_parent(app.root,500, 680)
+        self.center_on_parent(app.root, 520, 700)
 
         self.deiconify()
         # =========================
-        # NOTEBOOK (TABS)
+        # TABVIEW
         # =========================
 
-        notebook = ttk.Notebook(self)
-        notebook.pack(fill="both", expand=True)
+        self.tabview = ctk.CTkTabview(self)
+        self.tabview.pack(fill="both", expand=True, padx=10, pady=10)
+
+        self.tabview.add("Book")
+        self.tabview.add("Author")
+        self.tabview.add("Series")
+        self.tabview.add("Genre")
+        self.tabview.add("Topics")
 
         # =========================
         # BOOK TAB
         # =========================
 
-        self.book_tab = AddBookTab(notebook, self.app)
-        notebook.add(self.book_tab, text="Book")
+        self.book_tab = AddBookTab(self.tabview.tab("Book"), self.app)
+        self.book_tab.pack(fill="both", expand=True)
 
         # =========================
         # AUTHOR TAB
         # =========================
 
-        self.author_tab = AuthorTab(notebook, self.app, self)
-        notebook.add(self.author_tab, text="Author")
+        self.author_tab = AuthorTab(self.tabview.tab("Author"), self.app, self)
+        self.author_tab.pack(fill="both", expand=True)
 
         # =========================
         # SERIES TAB
         # =========================
 
-        self.series_tab = SeriesTab(notebook, self.app)
-        notebook.add(self.series_tab, text="Series")
+        self.series_tab = SeriesTab(self.tabview.tab("Series"), self.app)
+        self.series_tab.pack(fill="both", expand=True)
 
         # =========================
         # Genre TAB
         # =========================
 
-        genre_tab = GenreTab(notebook, self.app, self)
-        notebook.add(genre_tab, text="Genre")
+        genre_tab = GenreTab(self.tabview.tab("Genre"), self.app, self)
+        genre_tab.pack(fill="both", expand=True)
 
         # =========================
         # Topics TAB
         # =========================
 
-        topics_tab = TopicsTab(notebook, self.app, self)
-        notebook.add(topics_tab, text="Topics")
+        topics_tab = TopicsTab(self.tabview.tab("Topics"), self.app, self)
+        topics_tab.pack(fill="both", expand=True)
 
         self.protocol("WM_DELETE_WINDOW", self.on_close)
 

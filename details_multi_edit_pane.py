@@ -7,7 +7,7 @@ from windows.book_tabs.helpers.topics_scrollable import TopicsFrame
 
 class DetailsMultiEditPane(ctk.CTkFrame):
     def __init__(self, parent, par, app, book_ids):
-        super().__init__(parent)
+        super().__init__(parent, fg_color="transparent")
         self.parent = parent
         self.par = par
         self.app = app
@@ -24,7 +24,7 @@ class DetailsMultiEditPane(ctk.CTkFrame):
 
         self.style = {
             "width": 250,
-            "border_color": "gray40",
+            "border_color": ("gray70", "gray40"),
             "border_width": 1,
         }
 
@@ -34,7 +34,7 @@ class DetailsMultiEditPane(ctk.CTkFrame):
         }
 
         # Top action bar
-        bar = ctk.CTkFrame(self, fg_color="gray20")
+        bar = ctk.CTkFrame(self, fg_color="transparent")
         bar.pack(side="top", anchor="n", fill="x", expand=True)
         bar.columnconfigure(3, weight=1)
 
@@ -44,8 +44,8 @@ class DetailsMultiEditPane(ctk.CTkFrame):
         self.save_btn = ctk.CTkButton(
             bar,
             text=f"APPLY TO SELECTED ({len(self.book_ids)})",
-            fg_color="green",
-            hover_color="darkgreen",
+            fg_color="#238636",
+            hover_color="#2ea043",
             command=self.save_bulk
         )
         self.save_btn.grid(row=0, column=0, sticky="w", padx=5, pady=2)
@@ -54,8 +54,8 @@ class DetailsMultiEditPane(ctk.CTkFrame):
             bar,
             text="CANCEL",
             width=60,
-            fg_color="red",
-            hover_color="darkred",
+            fg_color="#cf222e",
+            hover_color="#f85149",
             command=self.app.close_book
         )
         self.cancel_btn.grid(row=0, column=1, sticky="w", padx=5, pady=2)
@@ -70,23 +70,23 @@ class DetailsMultiEditPane(ctk.CTkFrame):
             width=20,
             height=20,
             fg_color="transparent",
-            hover_color="gray30",
+            hover_color=("gray80", "gray30"),
             command=self.app.close_book
         )
         close_btn.grid(row=0, column=3, sticky="e", padx=5, pady=2)
 
         # Main details frame
-        details = ctk.CTkFrame(self, fg_color="gray20")
+        details = ctk.CTkFrame(self, fg_color="transparent")
         details.pack(side="top", anchor="n", fill="x", expand=True, pady=4)
         details.columnconfigure(0, weight=1, uniform="group1")
         details.columnconfigure(1, weight=1, uniform="group1")
         details.columnconfigure(2, weight=1, uniform="group1")
 
-        col1 = ctk.CTkFrame(details, fg_color="gray20")
+        col1 = ctk.CTkFrame(details, fg_color="transparent")
         col1.grid(row=0, column=0, sticky="nsew", padx=5, pady=2)
-        col2 = ctk.CTkFrame(details, fg_color="gray20")
+        col2 = ctk.CTkFrame(details, fg_color="transparent")
         col2.grid(row=0, column=1, sticky="nsew", padx=5, pady=2)
-        col3 = ctk.CTkFrame(details, fg_color="gray20")
+        col3 = ctk.CTkFrame(details, fg_color="transparent")
         col3.grid(row=0, column=2, sticky="nsew", padx=5, pady=2)
 
         # ------------------------------------
@@ -138,6 +138,9 @@ class DetailsMultiEditPane(ctk.CTkFrame):
             width=70,
             height=22,
             font=("Arial", 11),
+            fg_color=("#e1e4e8", "#30363d"),
+            hover_color=("#d0d7de", "#484f58"),
+            text_color=("#1f2328", "#f0f6fc"),
             command=self.select_all_topics
         )
         select_all_btn.pack(side="left", padx=2)
@@ -148,6 +151,9 @@ class DetailsMultiEditPane(ctk.CTkFrame):
             width=70,
             height=22,
             font=("Arial", 11),
+            fg_color=("#e1e4e8", "#30363d"),
+            hover_color=("#d0d7de", "#484f58"),
+            text_color=("#1f2328", "#f0f6fc"),
             command=self.clear_all_topics
         )
         clear_all_btn.pack(side="left", padx=2)
@@ -168,8 +174,8 @@ class DetailsMultiEditPane(ctk.CTkFrame):
             col3,
             height=120,
             width=260,
-            fg_color="#2b2b2b",
-            text_color="white",
+            fg_color=("#ffffff", "#2b2b2b"),
+            text_color=("#1f2328", "white"),
             font=("Arial", 11)
         )
         self.preview_box.pack(fill="both", expand=True, padx=5, pady=2)

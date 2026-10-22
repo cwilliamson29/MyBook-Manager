@@ -8,9 +8,9 @@ from windows.settings_helpers.cover_fetcher import auto_fetch_and_save_book_cove
 from windows.book_tabs.helpers.topics_scrollable import TopicsFrame
 
 
-class AddBookTab(tk.Frame):
+class AddBookTab(ctk.CTkFrame):
     def __init__(self, parent, app):
-        super().__init__(parent)
+        super().__init__(parent, fg_color="transparent")
         self.app = app
         self.parent = parent
 
@@ -21,7 +21,7 @@ class AddBookTab(tk.Frame):
 
         self.style = {
             "width": 250,
-            "border_color": "gray40",
+            "border_color": ("gray70", "gray40"),
             "border_width": 1,
         }
 
@@ -30,12 +30,12 @@ class AddBookTab(tk.Frame):
         self.grid_columnconfigure(2, weight=1)
 
         # Book Title
-        tk.Label(self, text="Book Title:").grid(row=0, column=0, sticky="e")
+        ctk.CTkLabel(self, text="Book Title:").grid(row=0, column=0, sticky="e", padx=(0, 6), pady=2)
         self.title_entry = ctk.CTkEntry(self, **self.style)
         self.title_entry.grid(row=0, column=1, sticky="w", pady=2)
 
         # Authors
-        tk.Label(self, text="Select Author:").grid(row=1, column=0, sticky="e", pady=2)
+        ctk.CTkLabel(self, text="Select Author:").grid(row=1, column=0, sticky="e", padx=(0, 6), pady=2)
         self.selected_author = tk.StringVar()
         self.author_map = {
             f"{first} {last}": author_id
@@ -55,7 +55,7 @@ class AddBookTab(tk.Frame):
         # Series
         self.selected_series = tk.StringVar()
 
-        self.series_label = tk.Label(self, text="Select Series:")
+        self.series_label = ctk.CTkLabel(self, text="Select Series:")
 
         self.series_dropdown = ctk.CTkComboBox(
             self,
@@ -65,7 +65,7 @@ class AddBookTab(tk.Frame):
         )
 
         # Number in series
-        self.num_in_series = tk.Label(self, text="Book Number:")
+        self.num_in_series = ctk.CTkLabel(self, text="Book Number:")
 
         self.num_in_series_entry = ctk.CTkEntry(self, **self.style)
 
@@ -75,12 +75,12 @@ class AddBookTab(tk.Frame):
         self.num_in_series.grid_forget()
 
         # Rating
-        tk.Label(self, text="Rating:").grid(row=4, column=0, sticky="e", pady=2)
+        ctk.CTkLabel(self, text="Rating:").grid(row=4, column=0, sticky="e", padx=(0, 6), pady=2)
         self.rating_entry = ctk.CTkEntry(self, **self.style)
         self.rating_entry.grid(row=4, column=1, sticky="w", pady=2)
 
         # Genres
-        tk.Label(self, text="Select Genre:").grid(row=5, column=0, sticky="e", pady=2)
+        ctk.CTkLabel(self, text="Select Genre:").grid(row=5, column=0, sticky="e", padx=(0, 6), pady=2)
         self.selected_genre = tk.StringVar()
         self.genre_map = {
             f"{title}": genre_id
@@ -95,33 +95,35 @@ class AddBookTab(tk.Frame):
         self.genre_dropdown.grid(row=5, column=1, sticky="w", pady=2)
 
         # ISBN
-        tk.Label(self, text="ISBN:").grid(row=6, column=0, sticky="e", pady=2)
+        ctk.CTkLabel(self, text="ISBN:").grid(row=6, column=0, sticky="e", padx=(0, 6), pady=2)
         self.isbn_entry = ctk.CTkEntry(self, **self.style)
         self.isbn_entry.grid(row=6, column=1, sticky="w", pady=2)
 
         # NLS Order
-        tk.Label(self, text="NLS Order:").grid(row=7, column=0, sticky="e", pady=2)
+        ctk.CTkLabel(self, text="NLS Order:").grid(row=7, column=0, sticky="e", padx=(0, 6), pady=2)
         self.nls_order_entry = ctk.CTkEntry(self, **self.style)
         self.nls_order_entry.grid(row=7, column=1, sticky="w", pady=2)
 
         # Topics
-        tk.Label(self, text="Topics:").grid(row=8, column=0, sticky="ne", pady=2)
+        ctk.CTkLabel(self, text="Topics:").grid(row=8, column=0, sticky="ne", padx=(0, 6), pady=2)
         self.topics_frame = TopicsFrame(self, self.topics)
         self.topics_frame.grid(row=8, column=1, sticky="w", pady=2)
 
         # Description
-        tk.Label(self, text="Description:").grid(row=9, column=0, sticky="ne", pady=2)
+        ctk.CTkLabel(self, text="Description:").grid(row=9, column=0, sticky="ne", padx=(0, 6), pady=2)
         self.description_entry = ctk.CTkTextbox(self, **self.style, height=100)
         self.description_entry.grid(row=9, column=1, sticky="w", pady=2)
 
-        self.error_label = tk.Label(self, text="", fg="red")
-        self.success_label = tk.Label(self, text="Book Successfully Added!", fg="green")
+        self.error_label = ctk.CTkLabel(self, text="", text_color="#f85149")
+        self.success_label = ctk.CTkLabel(self, text="Book Successfully Added!", text_color="#2ea043")
 
         ctk.CTkButton(
             self,
             text="Add Book",
+            fg_color="#238636",
+            hover_color="#2ea043",
             command=self.add_book
-        ).grid(row=11, column=1, pady=2)
+        ).grid(row=11, column=1, pady=6)
 
 
 
@@ -198,7 +200,7 @@ class AddBookTab(tk.Frame):
             else:
                 self.genre_dropdown.configure(**self.style)
 
-            self.error_label.config(text="Title, author, and Genre required")
+            self.error_label.configure(text="Title, author, and Genre required")
             self.error_label.grid(row=10, column=1)
             return
 
@@ -241,7 +243,7 @@ class AddBookTab(tk.Frame):
             self.topics_frame.clear()
             self.app.load_books()
         else:
-            self.error_label.config(text=f"Error: {db_attempt}!", fg="red")
+            self.error_label.configure(text=f"Error: {db_attempt}!")
             self.error_label.grid(row=10, column=1)
 
     def refresh_authors(self):

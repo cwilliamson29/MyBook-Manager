@@ -3,15 +3,15 @@ import customtkinter as ctk
 
 from db import db_add
 
-class AuthorTab(tk.Frame):
+class AuthorTab(ctk.CTkFrame):
     def __init__(self, parent, app, window):
-        super().__init__(parent)
+        super().__init__(parent, fg_color="transparent")
 
         self.app = app
         self.window = window
         self.style = {
             "width": 200,
-            "border_color": "gray40",
+            "border_color": ("gray70", "gray40"),
             "border_width": 1,
         }
 
@@ -19,22 +19,24 @@ class AuthorTab(tk.Frame):
         self.grid_columnconfigure(1, weight=0)
         self.grid_columnconfigure(2, weight=1)
 
-        tk.Label(self, text="First Name:").grid(row=0, column=0, sticky="e", pady=2)
+        ctk.CTkLabel(self, text="First Name:").grid(row=0, column=0, sticky="e", padx=(0, 6), pady=4)
         self.first = ctk.CTkEntry(self, **self.style)
-        self.first.grid(row=0, column=1, sticky="w", pady=2)
+        self.first.grid(row=0, column=1, sticky="w", pady=4)
 
-        tk.Label(self, text="Last Name:").grid(row=1, column=0, sticky="e", pady=2)
+        ctk.CTkLabel(self, text="Last Name:").grid(row=1, column=0, sticky="e", padx=(0, 6), pady=4)
         self.last = ctk.CTkEntry(self, **self.style)
-        self.last.grid(row=1, column=1, sticky="w", pady=2)
+        self.last.grid(row=1, column=1, sticky="w", pady=4)
 
-        self.error_label = tk.Label(self, text="", fg="red")
-        self.success_label = tk.Label(self, text="Author Successfully Added!", fg="green")
+        self.error_label = ctk.CTkLabel(self, text="", text_color="#f85149")
+        self.success_label = ctk.CTkLabel(self, text="Author Successfully Added!", text_color="#2ea043")
 
         ctk.CTkButton(
             self,
             text="Add Author",
+            fg_color="#238636",
+            hover_color="#2ea043",
             command=self.add_author
-        ).grid(row=3, column=1, pady=2)
+        ).grid(row=3, column=1, pady=6)
 
     def add_author(self):
         self.error_label.grid_forget()
@@ -53,7 +55,7 @@ class AuthorTab(tk.Frame):
             if not lname:
                 self.last.configure(border_color="red")
 
-            self.error_label.config(text="First and last name required")
+            self.error_label.configure(text="First and last name required")
             self.error_label.grid(row=2, column=1)
             return
         data = (fname, lname)
@@ -70,5 +72,5 @@ class AuthorTab(tk.Frame):
             self.window.refresh_book_tab_authors()
             self.window.refresh_series_tab_authors()
         else:
-            self.error_label.config(text=f"Error: {db_attempt}!", fg="red")
+            self.error_label.configure(text=f"Error: {db_attempt}!")
             self.error_label.grid(row=2, column=1)
