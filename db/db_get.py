@@ -91,16 +91,49 @@ def get_series_stats(series_id):
 
 
 def get_genres():
-    sql = "SELECT id, title, color_scheme FROM genre ORDER BY title"
+    sql = "SELECT id, title, color_scheme FROM genre ORDER BY title COLLATE NOCASE ASC"
     return get_from_db(sql, None)
 
 def get_genres_titles():
-    sql = "SELECT id, title FROM genre ORDER BY title"
+    sql = "SELECT id, title FROM genre ORDER BY title COLLATE NOCASE ASC"
     return get_from_db(sql, None)
 
 def get_genres_by_title(title):
     sql = "SELECT * FROM genre WHERE title = ?"
     return get_from_db(sql, (title,))
+
+def get_genre_by_id(genre_id):
+    sql = "SELECT id, title, color_scheme FROM genre WHERE id = ?"
+    return get_from_db(sql, (genre_id,))
+
+def get_genre_stats(genre_id):
+    conn = get_connection()
+    cur = conn.cursor()
+    try:
+        cur.execute("SELECT COUNT(*) FROM books WHERE genre_id = ?", (genre_id,))
+        book_count = cur.fetchone()[0]
+    except Exception:
+        book_count = 0
+    finally:
+        conn.close()
+    return {"books": book_count}
+
+def get_genres_with_counts():
+    conn = get_connection()
+    cur = conn.cursor()
+    try:
+        cur.execute("""
+            SELECT genre.id, genre.title, genre.color_scheme, COUNT(books.id) as book_count
+            FROM genre
+            LEFT JOIN books ON genre.id = books.genre_id
+            GROUP BY genre.id, genre.title, genre.color_scheme
+            ORDER BY genre.title COLLATE NOCASE ASC
+        """)
+        return cur.fetchall()
+    except Exception:
+        return []
+    finally:
+        conn.close()
 
 def get_series_by_author(author_id):
     sql = "SELECT id, title FROM series WHERE author_id = ?"

@@ -95,9 +95,17 @@ class BookTable(tk.Frame):
         self.tree.tag_configure("evenrow", background="white", foreground="black")
         # Genre Tags
         self.genre_tags = db_get.get_genres()
+        genre_color_map = {}
         for genre in self.genre_tags:
-            if genre[2] is not None:
-                self.tree.tag_configure(genre[1], background=genre[2], foreground="black")
+            g_title = genre[1]
+            g_color = genre[2]
+            if g_title:
+                if g_color is not None and str(g_color).strip():
+                    self.tree.tag_configure(g_title, background=str(g_color).strip(), foreground="black")
+                    genre_color_map[g_title] = str(g_color).strip()
+                else:
+                    genre_color_map[g_title] = None
+
         # clear old rows
         for row in self.tree.get_children():
             self.tree.delete(row)
@@ -105,11 +113,11 @@ class BookTable(tk.Frame):
         # insert new rows
         for index, book in enumerate(books):
             topics = db_get.get_book_topics_names(book[0])
-            tag = ""
-            genre_color_tag = db_get.get_genres_by_title(book[7])
+            genre = book[7]
+            genre_color = genre_color_map.get(genre)
 
-            if genre_color_tag and genre_color_tag[0][2] is not None:
-                tag = genre_color_tag[0][1]
+            if genre and genre_color:
+                tag = genre
             else:
                 tag = "evenrow" if index % 2 == 0 else "oddrow"
 

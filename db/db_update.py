@@ -70,6 +70,53 @@ def update_book_isbn(book_id, isbn):
     finally:
         conn.close()
 
+def update_genre_color(genre_id, color_scheme):
+    """
+    Updates the color scheme for a genre.
+    color_scheme: hex color string (e.g. '#FF5733') or None / empty string
+    """
+    clean_color = str(color_scheme).strip() if color_scheme else None
+    if clean_color == "":
+        clean_color = None
+
+    conn = get_connection()
+    cursor = conn.cursor()
+    try:
+        cursor.execute("UPDATE genre SET color_scheme = ? WHERE id = ?", (clean_color, genre_id))
+        conn.commit()
+        return "success"
+    except sqlite3.Error as e:
+        print("SQLite error in update_genre_color: ", e)
+        conn.rollback()
+        return str(e)
+    finally:
+        conn.close()
+
+def update_genre(genre_id, title, color_scheme):
+    """
+    Updates the title and color scheme for a genre.
+    """
+    title = str(title).strip()
+    if not title:
+        return "Genre title cannot be empty"
+
+    clean_color = str(color_scheme).strip() if color_scheme else None
+    if clean_color == "":
+        clean_color = None
+
+    conn = get_connection()
+    cursor = conn.cursor()
+    try:
+        cursor.execute("UPDATE genre SET title = ?, color_scheme = ? WHERE id = ?", (title, clean_color, genre_id))
+        conn.commit()
+        return "success"
+    except sqlite3.Error as e:
+        print("SQLite error in update_genre: ", e)
+        conn.rollback()
+        return str(e)
+    finally:
+        conn.close()
+
 def remove_book_topic(data):
     rem = """DELETE FROM book_topics WHERE book_id = ?"""
     db = add_to_db(rem, data)

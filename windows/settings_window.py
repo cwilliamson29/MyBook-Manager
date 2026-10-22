@@ -5,9 +5,10 @@ import threading
 from pathlib import Path
 from datetime import datetime
 import tkinter as tk
-from tkinter import ttk, messagebox
+from tkinter import ttk, messagebox, colorchooser
 import customtkinter as ctk
 from PIL import Image
+from CTkColorPicker import AskColor
 
 from db.config import DB_NAME
 from db import db_get, db_update
@@ -29,7 +30,7 @@ class SettingsWindow(ctk.CTkToplevel):
         self.app = app
 
         self.title("Settings & Preferences")
-        self.center_on_parent(app.root, 620, 700)
+        self.center_on_parent(app.root, 640, 720)
         self.resizable(False, False)
 
         self.protocol("WM_DELETE_WINDOW", self.on_close)
@@ -115,12 +116,14 @@ class SettingsWindow(ctk.CTkToplevel):
 
         self.db_tab = self.tabview.add("Database")
         self.authors_series_tab = self.tabview.add("Authors & Series")
+        self.genres_tab = self.tabview.add("Genres")
         self.import_tab = self.tabview.add("Import Data")
         self.appearance_tab = self.tabview.add("Appearance")
         self.about_tab = self.tabview.add("About")
 
         self.build_database_tab()
         self.build_authors_series_tab()
+        self.build_genres_tab()
         self.build_import_tab()
         self.build_appearance_tab()
         self.build_about_tab()
@@ -908,6 +911,530 @@ class SettingsWindow(ctk.CTkToplevel):
                 self.app.load_books()
         else:
             self.series_feedback_label.configure(text=f"Error updating series: {res}", text_color="#f85149")
+
+    # =========================================================================
+    # TAB 3: GENRES & COLOR SCHEMES
+    # =========================================================================
+    def build_genres_tab(self):
+        tab = self.genres_tab
+
+        self.genre_display_to_id = {}
+        self.genre_id_to_obj = {}
+        self.genre_id_to_display = {}
+
+        # 1. Header / Selection Card
+        sel_card = ctk.CTkFrame(tab, **self.card_style)
+        sel_card.pack(fill="x", padx=4, pady=(6, 4))
+
+        sel_header = ctk.CTkFrame(sel_card, fg_color="transparent")
+        sel_header.pack(fill="x", padx=12, pady=(10, 4))
+
+        title_box = ctk.CTkFrame(sel_header, fg_color="transparent")
+        title_box.pack(side="left", fill="x", expand=True)
+
+        ctk.CTkLabel(
+            title_box,
+            text="Genre Color & Label Editor",
+            font=("Arial", 13, "bold"),
+            text_color="#f0f6fc"
+        ).pack(anchor="w")
+
+        ctk.CTkLabel(
+            title_box,
+            text="Customize the highlight color and display title for each genre.",
+            font=("Arial", 11),
+            text_color="#8b949e"
+        ).pack(anchor="w")
+
+        reload_btn = ctk.CTkButton(
+            sel_header,
+            text="Reload",
+            width=60,
+            height=22,
+            font=("Arial", 11),
+            fg_color="#21262d",
+            hover_color="#30363d",
+            border_width=1,
+            border_color="#30363d",
+            command=self.refresh_genres_dropdown
+        )
+        reload_btn.pack(side="right")
+
+        sel_body = ctk.CTkFrame(sel_card, fg_color="transparent")
+        sel_body.pack(fill="x", padx=12, pady=(4, 10))
+
+        self.genre_select_var = ctk.StringVar()
+        self.genre_select_combo = ctk.CTkComboBox(
+            sel_body,
+            variable=self.genre_select_var,
+            values=["Loading..."],
+            command=self.on_genre_selected,
+            font=("Arial", 12),
+            dropdown_font=("Arial", 12),
+            height=32,
+            corner_radius=6
+        )
+        self.genre_select_combo.pack(fill="x")
+
+        # 2. Genre Details & Color Editor Card
+        edit_card = ctk.CTkFrame(tab, **self.card_style)
+        edit_card.pack(fill="x", padx=4, pady=4)
+
+        ctk.CTkLabel(
+            edit_card,
+            text="Color & Label Settings",
+            font=("Arial", 13, "bold"),
+            text_color="#f0f6fc"
+        ).pack(anchor="w", padx=12, pady=(10, 2))
+
+        # Fields Form Grid
+        form_frame = ctk.CTkFrame(edit_card, fg_color="transparent")
+        form_frame.pack(fill="x", padx=12, pady=4)
+        form_frame.columnconfigure(1, weight=1)
+
+        # Title Field
+        ctk.CTkLabel(form_frame, text="Genre Title:", font=("Arial", 12, "bold"), text_color="#f0f6fc", anchor="w").grid(row=0, column=0, padx=(0, 10), pady=4, sticky="w")
+        self.genre_title_entry = ctk.CTkEntry(form_frame, font=("Arial", 12), height=30, corner_radius=6)
+        self.genre_title_entry.grid(row=0, column=1, sticky="ew", pady=4)
+        self.genre_title_entry.bind("<KeyRelease>", lambda e: self.update_color_preview())
+
+        # Color Hex Code Field + Pick Button
+        ctk.CTkLabel(form_frame, text="Hex Color:", font=("Arial", 12, "bold"), text_color="#f0f6fc", anchor="w").grid(row=1, column=0, padx=(0, 10), pady=4, sticky="w")
+
+        color_input_box = ctk.CTkFrame(form_frame, fg_color="transparent")
+        color_input_box.grid(row=1, column=1, sticky="ew", pady=4)
+        color_input_box.columnconfigure(0, weight=1)
+
+        self.genre_color_entry = ctk.CTkEntry(color_input_box, placeholder_text="#RRGGBB (or blank for default)", font=("Arial", 12), height=30, corner_radius=6)
+        self.genre_color_entry.grid(row=0, column=0, sticky="ew", padx=(0, 6))
+        self.genre_color_entry.bind("<KeyRelease>", lambda e: self.update_color_preview())
+
+        self.pick_color_btn = ctk.CTkButton(
+            color_input_box,
+            text="🎨 Pick Color...",
+            width=110,
+            height=30,
+            font=("Arial", 11, "bold"),
+            fg_color="#1f6feb",
+            hover_color="#388bfd",
+            command=self.pick_genre_color
+        )
+        self.pick_color_btn.grid(row=0, column=1, sticky="e")
+
+        # Visual Table Row Highlight Preview Card
+        self.genre_preview_frame = ctk.CTkFrame(
+            edit_card,
+            fg_color="#21262d",
+            corner_radius=6,
+            border_width=1,
+            border_color="#30363d",
+            height=34
+        )
+        self.genre_preview_frame.pack(fill="x", padx=12, pady=6)
+        self.genre_preview_frame.pack_propagate(False)
+
+        self.genre_preview_label = ctk.CTkLabel(
+            self.genre_preview_frame,
+            text="📖 Table Row Preview",
+            font=("Arial", 12, "bold"),
+            text_color="#8b949e"
+        )
+        self.genre_preview_label.pack(expand=True)
+
+        # Quick Preset Palette Chips
+        palette_box = ctk.CTkFrame(edit_card, fg_color="transparent")
+        palette_box.pack(fill="x", padx=12, pady=(2, 4))
+
+        ctk.CTkLabel(
+            palette_box,
+            text="Quick Color Palette:",
+            font=("Arial", 11, "bold"),
+            text_color="#8b949e"
+        ).pack(anchor="w", pady=(0, 4))
+
+        palette_grid = ctk.CTkFrame(palette_box, fg_color="transparent")
+        palette_grid.pack(fill="x")
+
+        presets = [
+            ("Coral", "#FF6B6B"),
+            ("Peach", "#FFA07A"),
+            ("Amber", "#FFD166"),
+            ("Sage", "#A7C957"),
+            ("Mint", "#06D6A0"),
+            ("Cyan", "#48CAE4"),
+            ("Sky", "#4EA8DE"),
+            ("Indigo", "#5390D9"),
+            ("Lavender", "#B5838D"),
+            ("Violet", "#9D4EDD"),
+            ("Rose", "#E29578"),
+            ("Slate", "#ADB5BD"),
+        ]
+
+        for idx, (p_name, p_hex) in enumerate(presets):
+            col_i = idx % 6
+            row_i = idx // 6
+            palette_grid.columnconfigure(col_i, weight=1)
+            p_btn = ctk.CTkButton(
+                palette_grid,
+                text=p_name,
+                font=("Arial", 10, "bold"),
+                fg_color=p_hex,
+                text_color="#111111",
+                hover_color=p_hex,
+                height=22,
+                corner_radius=4,
+                command=lambda col=p_hex: self.set_selected_color(col)
+            )
+            p_btn.grid(row=row_i, column=col_i, padx=2, pady=2, sticky="ew")
+
+        # Clear Color / Default row button
+        clear_row = ctk.CTkFrame(edit_card, fg_color="transparent")
+        clear_row.pack(fill="x", padx=12, pady=(4, 6))
+
+        self.clear_color_btn = ctk.CTkButton(
+            clear_row,
+            text="✕ Clear Color (Reset to Alternating Rows)",
+            font=("Arial", 11),
+            fg_color="#30363d",
+            hover_color="#484f58",
+            height=24,
+            command=lambda: self.set_selected_color("")
+        )
+        self.clear_color_btn.pack(side="left")
+
+        self.genre_books_badge = ctk.CTkLabel(
+            clear_row,
+            text="0 Books Assigned",
+            font=("Arial", 11, "bold"),
+            text_color="#58a6ff"
+        )
+        self.genre_books_badge.pack(side="right")
+
+        # Feedback Label
+        self.genre_feedback_label = ctk.CTkLabel(
+            edit_card,
+            text="",
+            font=("Arial", 11),
+            text_color="#3fb950"
+        )
+        self.genre_feedback_label.pack(anchor="w", padx=12, pady=(2, 4))
+
+        # Save & Reset Actions
+        action_row = ctk.CTkFrame(edit_card, fg_color="transparent")
+        action_row.pack(fill="x", padx=12, pady=(2, 10))
+        action_row.columnconfigure(0, weight=2)
+        action_row.columnconfigure(1, weight=1)
+
+        self.save_genre_btn = ctk.CTkButton(
+            action_row,
+            text="Save Changes",
+            font=("Arial", 12, "bold"),
+            fg_color="#238636",
+            hover_color="#2ea043",
+            height=32,
+            command=self.handle_save_genre
+        )
+        self.save_genre_btn.grid(row=0, column=0, padx=(0, 6), sticky="ew")
+
+        self.reset_genre_btn = ctk.CTkButton(
+            action_row,
+            text="Reset",
+            font=("Arial", 12),
+            fg_color="#30363d",
+            hover_color="#484f58",
+            height=32,
+            command=self.reset_genre_form
+        )
+        self.reset_genre_btn.grid(row=0, column=1, sticky="ew")
+
+        # 3. All Genres Catalog Overview Card
+        list_card = ctk.CTkFrame(tab, **self.card_style)
+        list_card.pack(fill="both", expand=True, padx=4, pady=(4, 6))
+
+        list_header = ctk.CTkFrame(list_card, fg_color="transparent")
+        list_header.pack(fill="x", padx=12, pady=(8, 4))
+
+        ctk.CTkLabel(
+            list_header,
+            text="All Genres & Color Badges",
+            font=("Arial", 12, "bold"),
+            text_color="#f0f6fc"
+        ).pack(side="left")
+
+        ctk.CTkLabel(
+            list_header,
+            text="Click any genre to edit",
+            font=("Arial", 10, "italic"),
+            text_color="#8b949e"
+        ).pack(side="right")
+
+        self.genres_list_scroll = ctk.CTkScrollableFrame(
+            list_card,
+            fg_color="#161b22",
+            corner_radius=6,
+            border_width=1,
+            border_color="#30363d",
+            height=120
+        )
+        self.genres_list_scroll.pack(fill="both", expand=True, padx=12, pady=(0, 8))
+
+        # Initial Load
+        self.refresh_genres_dropdown()
+
+    def refresh_genres_dropdown(self, selected_id=None):
+        genres = db_get.get_genres_with_counts()
+
+        self.genre_display_to_id.clear()
+        self.genre_id_to_obj.clear()
+        self.genre_id_to_display.clear()
+
+        display_values = []
+        for g_id, g_title, g_color, b_count in genres:
+            col_mark = "● " if (g_color and str(g_color).strip()) else "○ "
+            disp = f"{col_mark}{g_title} ({b_count} books)"
+            self.genre_display_to_id[disp] = g_id
+            self.genre_id_to_obj[g_id] = {
+                "id": g_id,
+                "title": g_title,
+                "color_scheme": g_color,
+                "book_count": b_count
+            }
+            self.genre_id_to_display[g_id] = disp
+            display_values.append(disp)
+
+        if not display_values:
+            display_values = ["No Genres Found"]
+
+        self.genre_select_combo.configure(values=display_values)
+
+        target_disp = None
+        if selected_id and selected_id in self.genre_id_to_display:
+            target_disp = self.genre_id_to_display[selected_id]
+        elif display_values and display_values[0] != "No Genres Found":
+            target_disp = display_values[0]
+
+        if target_disp:
+            self.genre_select_var.set(target_disp)
+            self.on_genre_selected(target_disp)
+        else:
+            self.genre_title_entry.delete(0, "end")
+            self.genre_color_entry.delete(0, "end")
+            self.genre_books_badge.configure(text="0 Books Assigned")
+            self.update_color_preview("")
+
+        self.render_genres_overview_list(genres)
+
+    def render_genres_overview_list(self, genres=None):
+        if genres is None:
+            genres = db_get.get_genres_with_counts()
+
+        for w in self.genres_list_scroll.winfo_children():
+            w.destroy()
+
+        if not genres:
+            ctk.CTkLabel(
+                self.genres_list_scroll,
+                text="No genres available in the database.",
+                font=("Arial", 11),
+                text_color="#8b949e"
+            ).pack(pady=15)
+            return
+
+        for g_id, g_title, g_color, b_count in genres:
+            has_color = bool(g_color and str(g_color).strip())
+            color_hex = str(g_color).strip() if has_color else ""
+
+            row_frame = ctk.CTkFrame(
+                self.genres_list_scroll,
+                fg_color="#21262d",
+                corner_radius=4,
+                height=28
+            )
+            row_frame.pack(fill="x", pady=2, padx=2)
+            row_frame.pack_propagate(False)
+
+            # Swatch badge
+            swatch_bg = color_hex if has_color else "#30363d"
+            swatch = ctk.CTkFrame(
+                row_frame,
+                width=16,
+                height=16,
+                fg_color=swatch_bg,
+                corner_radius=4,
+                border_width=1 if not has_color else 0,
+                border_color="#8b949e"
+            )
+            swatch.pack(side="left", padx=(8, 6), pady=6)
+
+            title_lbl = ctk.CTkLabel(
+                row_frame,
+                text=g_title,
+                font=("Arial", 11, "bold"),
+                text_color="#f0f6fc",
+                anchor="w",
+                cursor="hand2"
+            )
+            title_lbl.pack(side="left", fill="x", expand=True, padx=4)
+
+            count_lbl = ctk.CTkLabel(
+                row_frame,
+                text=f"{b_count} books" if b_count != 1 else "1 book",
+                font=("Arial", 10),
+                text_color="#8b949e",
+                cursor="hand2"
+            )
+            count_lbl.pack(side="right", padx=8)
+
+            # Make entire row clickable to select
+            select_cmd = lambda gid=g_id: self.select_genre_by_id(gid)
+            row_frame.bind("<Button-1>", lambda e, cmd=select_cmd: cmd())
+            title_lbl.bind("<Button-1>", lambda e, cmd=select_cmd: cmd())
+            count_lbl.bind("<Button-1>", lambda e, cmd=select_cmd: cmd())
+
+    def select_genre_by_id(self, genre_id):
+        if genre_id in self.genre_id_to_display:
+            disp = self.genre_id_to_display[genre_id]
+            self.genre_select_var.set(disp)
+            self.on_genre_selected(disp)
+
+    def on_genre_selected(self, choice=None):
+        disp = self.genre_select_var.get()
+        genre_id = self.genre_display_to_id.get(disp)
+        if not genre_id or genre_id not in self.genre_id_to_obj:
+            return
+
+        obj = self.genre_id_to_obj[genre_id]
+        self.genre_title_entry.delete(0, "end")
+        self.genre_title_entry.insert(0, obj["title"])
+
+        self.genre_color_entry.delete(0, "end")
+        if obj["color_scheme"]:
+            self.genre_color_entry.insert(0, str(obj["color_scheme"]))
+
+        self.genre_books_badge.configure(text=f"{obj['book_count']} Books Assigned")
+        self.genre_feedback_label.configure(text="")
+        self.update_color_preview()
+
+    def set_selected_color(self, hex_code):
+        clean_code = str(hex_code).strip() if hex_code else ""
+        self.genre_color_entry.delete(0, "end")
+        if clean_code:
+            self.genre_color_entry.insert(0, clean_code)
+        self.update_color_preview(clean_code)
+
+    def update_color_preview(self, hex_code=None):
+        if hex_code is None:
+            hex_code = self.genre_color_entry.get().strip() if hasattr(self, "genre_color_entry") else ""
+
+        genre_name = self.genre_title_entry.get().strip() if hasattr(self, "genre_title_entry") else "Genre"
+        if not genre_name:
+            genre_name = "Genre"
+
+        clean_hex = str(hex_code).strip()
+        if clean_hex and not clean_hex.startswith("#") and len(clean_hex) in (3, 6):
+            clean_hex = "#" + clean_hex
+
+        is_valid_hex = False
+        if clean_hex.startswith("#") and len(clean_hex) in (4, 7):
+            try:
+                int(clean_hex.lstrip("#"), 16)
+                is_valid_hex = True
+            except ValueError:
+                is_valid_hex = False
+
+        if is_valid_hex:
+            bg_col = clean_hex
+            text_col = "#000000"
+            display_text = f"📖 Table Highlight Preview  •  {genre_name} ({clean_hex})"
+        else:
+            bg_col = "#21262d"
+            text_col = "#8b949e"
+            display_text = f"📖 Table Highlight Preview  •  {genre_name} (Default Alternating Rows)"
+
+        try:
+            self.genre_preview_frame.configure(fg_color=bg_col)
+            self.genre_preview_label.configure(text=display_text, text_color=text_col)
+        except Exception:
+            pass
+
+    def pick_genre_color(self):
+        current_val = self.genre_color_entry.get().strip()
+        if current_val and not current_val.startswith("#") and len(current_val) in (3, 6):
+            current_val = "#" + current_val
+
+        init_color = current_val if (current_val.startswith("#") and len(current_val) in (4, 7)) else "#4EA8DE"
+
+        chosen_color = None
+        try:
+            picker = AskColor(title="Choose Genre Color", initial_color=init_color)
+            color = picker.get()
+            if color:
+                chosen_color = color
+        except Exception:
+            try:
+                rgb, hex_code = colorchooser.askcolor(color=init_color, title="Choose Genre Color")
+                if hex_code:
+                    chosen_color = hex_code
+            except Exception as e:
+                print("Color chooser error:", e)
+
+        if chosen_color:
+            self.set_selected_color(chosen_color)
+
+    def reset_genre_form(self):
+        disp = self.genre_select_var.get()
+        self.on_genre_selected(disp)
+        self.genre_feedback_label.configure(text="Form reset to saved values.", text_color="#8b949e")
+
+    def handle_save_genre(self):
+        disp = self.genre_select_var.get()
+        genre_id = self.genre_display_to_id.get(disp)
+        if not genre_id:
+            self.genre_feedback_label.configure(text="Please select a genre to edit.", text_color="#f85149")
+            return
+
+        new_title = self.genre_title_entry.get().strip()
+        if not new_title:
+            self.genre_feedback_label.configure(text="Genre title cannot be blank.", text_color="#f85149")
+            return
+
+        raw_color = self.genre_color_entry.get().strip()
+        new_color = None
+        if raw_color:
+            if not raw_color.startswith("#") and len(raw_color) in (3, 6):
+                raw_color = "#" + raw_color
+            if raw_color.startswith("#") and len(raw_color) in (4, 7):
+                try:
+                    int(raw_color.lstrip("#"), 16)
+                    new_color = raw_color
+                except ValueError:
+                    self.genre_feedback_label.configure(text="Invalid hex color format (use #RRGGBB).", text_color="#f85149")
+                    return
+            else:
+                self.genre_feedback_label.configure(text="Invalid hex color format (use #RRGGBB or leave blank).", text_color="#f85149")
+                return
+
+        res = db_update.update_genre(genre_id, new_title, new_color)
+        if res == "success":
+            self.genre_feedback_label.configure(
+                text=f"✓ Genre '{new_title}' and color updated successfully!",
+                text_color="#3fb950"
+            )
+            self.refresh_stats(custom_status=f"Updated genre: {new_title}")
+
+            # Notify and refresh main application table and filters
+            if hasattr(self.app, "load_books"):
+                self.app.load_books()
+            if hasattr(self.app, "load_genres_into_filter"):
+                self.app.load_genres_into_filter()
+
+            # Refresh local dropdown and list
+            self.refresh_genres_dropdown(selected_id=genre_id)
+        else:
+            self.genre_feedback_label.configure(
+                text=f"Error saving genre: {res}",
+                text_color="#f85149"
+            )
 
     # =========================================================================
     # TAB 3: DATA IMPORT & COVERS
