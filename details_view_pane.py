@@ -3,8 +3,6 @@ import requests
 import PIL.Image as Image
 from io import BytesIO
 
-from PIL import ImageTk
-
 from db import db_get
 
 
@@ -37,15 +35,13 @@ class DetailsViewPane(ctk.CTkFrame):
         col2 = ctk.CTkFrame(details, fg_color="gray20")
         col2.grid(row=0, column=1, sticky="nsew")
 
-        close_img = Image.open('assets/img/close_btn.png').convert('RGBA')
-        close_img = close_img.resize((20, 20))
-        close_img_display = ImageTk.PhotoImage(close_img)
+        close_pil = Image.open('assets/img/close_btn.png').convert('RGBA')
+        close_img = ctk.CTkImage(light_image=close_pil, dark_image=close_pil, size=(16, 16))
 
         self.edit_btn = ctk.CTkButton(bar, text="EDIT", width=50, command=lambda: self.par.edit_book(self.book[0]))
         self.edit_btn.grid(row=0, column=0, sticky="w", padx=5, pady=2)
 
-        close_btn = ctk.CTkButton(bar, image=close_img_display, text=None, width=20, fg_color="transparent", command=self.app.close_book)
-        close_btn.image = close_img_display
+        close_btn = ctk.CTkButton(bar, image=close_img, text="", width=20, height=20, fg_color="transparent", hover_color="gray30", command=self.app.close_book)
         close_btn.grid(row=0, column=1, sticky="e", padx=5, pady=2)
 
         pady = 0

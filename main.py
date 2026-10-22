@@ -1,7 +1,7 @@
 import tkinter as tk
 from tkinter import ttk
 import customtkinter as ctk
-from PIL import Image, ImageTk
+from PIL import Image
 
 
 from db import database, db_get
@@ -28,9 +28,8 @@ class MyBookManager:
         self.center_window(1280, 800)
 
         img_path = "assets/img/gear-icon.webp"
-        img = Image.open(img_path)
-        img = img.resize((33,33),)
-        gear_img = ImageTk.PhotoImage(img)
+        gear_pil = Image.open(img_path)
+        gear_img = ctk.CTkImage(light_image=gear_pil, dark_image=gear_pil, size=(22, 22))
 
         self.author_map = {}
         self.topic_map = {}
@@ -56,10 +55,10 @@ class MyBookManager:
         #############################
         # Top frame buttons and label
         #############################
-        add_btn = ctk.CTkButton(top_frame, text=" + ", command=self.open_add_window, height=30, width=30, corner_radius=5, border_color="blue", font=("Arial", 30))
+        add_btn = ctk.CTkButton(top_frame, text="+", command=self.open_add_window, height=36, width=36, corner_radius=5, border_color="blue", font=("Arial", 20, "bold"))
         add_btn.grid(row=0, column=0, padx=4, pady=5)
 
-        settings_btn = ctk.CTkButton(top_frame, image=gear_img, text="", command=self.open_settings_window, height=30, width=30, corner_radius=5, border_color="blue", font=("Arial", 30))
+        settings_btn = ctk.CTkButton(top_frame, image=gear_img, text="", command=self.open_settings_window, height=36, width=36, corner_radius=5, border_color="blue")
         settings_btn.grid(row=0, column=1, padx=4, pady=5)
 
         app_label = tk.Label(top_frame, text="MyBook Manager", font=("Arial", 14, "bold"), fg="lightblue")

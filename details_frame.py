@@ -5,10 +5,10 @@ import threading
 import customtkinter as ctk
 import requests
 import PIL.Image as Image
-from PIL import ImageTk
 
 from db import db_get, db_update
 from windows.settings_helpers.cover_fetcher import auto_fetch_and_save_book_cover, clean_isbn
+from windows.cover_search_dialog import CoverSearchDialog
 from details_edit_pane import DetailsEditPane
 from details_view_pane import DetailsViewPane
 from details_multi_edit_pane import DetailsMultiEditPane
@@ -130,8 +130,12 @@ class DetailsFrame(ctk.CTkFrame):
         self.load_default_cover()
 
     def fetch_cover_online(self):
-        """Fetches the book cover image from online APIs using the book's ISBN."""
-        if not self.book_id or self.is_fetching:
+        """
+        Opens a prompt allowing the user to search for cover artwork online
+        based on the book title and author name, previews up to 3 results, and
+        lets the user choose which one to save to the database.
+        """
+        if not self.book_id:
             return
 
         book_rows = db_get.get_book_by_id(self.book_id)
@@ -139,37 +143,44 @@ class DetailsFrame(ctk.CTkFrame):
             messagebox.showerror("Error", "Book not found.")
             return
 
-        isbn = book_rows[0][10]
-        cleaned = clean_isbn(isbn)
-        if not cleaned:
-            messagebox.showinfo(
-                "ISBN Required",
-                "This book does not have a valid ISBN recorded in the database.\n\nPlease edit the book details to add an ISBN first."
-            )
+        book = book_rows[0]
+        title = book[1] or ""
+        first_name = book[6] or ""
+        last_name = book[7] or ""
+        author = f"{first_name} {last_name}".strip()
+        isbn = book[10] or ""
+
+        # Launch the interactive cover search dialog
+        CoverSearchDialog(
+            parent=self,
+            app=self.app,
+            book_id=self.book_id,
+            title=title,
+            author=author,
+            isbn=isbn,
+            on_cover_selected=lambda bid: self.on_cover_and_isbn_updated(bid)
+        )
+
+    def on_cover_and_isbn_updated(self, book_id):
+        """Callback when cover and/or ISBN are updated from online search."""
+        if not book_id:
             return
 
-        self.is_fetching = True
-        self.fetch_btn.configure(text="Fetching...", state="disabled")
-        self.upload_btn.configure(state="disabled")
-
-        target_book_id = self.book_id
-
-        def _bg_worker():
-            success, msg = auto_fetch_and_save_book_cover(target_book_id, cleaned)
-            self.after(0, lambda: self._on_fetch_finish(target_book_id, success, msg))
-
-        threading.Thread(target=_bg_worker, daemon=True).start()
-
-    def _on_fetch_finish(self, book_id, success, msg):
-        self.is_fetching = False
-        self.fetch_btn.configure(text="Auto Cover", state="normal")
-        self.upload_btn.configure(state="normal")
-
-        if success:
-            if self.book_id == book_id:
-                self.load_cover_image(book_id)
+        # If currently editing the book, update the ISBN entry field
+        if isinstance(self.details_pane, DetailsEditPane):
+            book_rows = db_get.get_book_by_id(book_id)
+            if book_rows and hasattr(self.details_pane, "isbn_entry"):
+                new_isbn = book_rows[0][10] or ""
+                self.details_pane.isbn_entry.delete(0, "end")
+                self.details_pane.isbn_entry.insert(0, str(new_isbn))
+            self.load_cover_image(book_id)
         else:
-            messagebox.showinfo("Cover Search", msg)
+            # Reload details view pane with updated data (including ISBN) and cover image
+            self.load_book(book_id)
+
+        # Refresh main book table to reflect updated ISBN
+        if hasattr(self.app, "load_books"):
+            self.app.load_books()
 
     def upload_cover(self):
         """Prompts user to select an image, validates it, and saves to database."""

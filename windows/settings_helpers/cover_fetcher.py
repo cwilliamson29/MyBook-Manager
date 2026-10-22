@@ -142,6 +142,46 @@ def clean_search_term(term) -> str:
     return cleaned
 
 
+def extract_best_isbn(isbn_candidates) -> str | None:
+    """
+    Given a list or single ISBN string, extracts and returns the best valid ISBN.
+    Prefers standard ISBN-13 (13 digits starting with 978 or 979) over ISBN-10.
+    """
+    if not isbn_candidates:
+        return None
+    if isinstance(isbn_candidates, str):
+        candidates = [isbn_candidates]
+    else:
+        candidates = list(isbn_candidates)
+
+    cleaned_list = []
+    for c in candidates:
+        cleaned = clean_isbn(c)
+        if cleaned:
+            cleaned_list.append(cleaned)
+
+    # 1. Prefer ISBN-13 starting with 978 or 979
+    for c in cleaned_list:
+        if len(c) == 13 and (c.startswith("978") or c.startswith("979")):
+            return c
+
+    # 2. Other 13-digit numbers
+    for c in cleaned_list:
+        if len(c) == 13:
+            return c
+
+    # 3. 10-digit ISBNs
+    for c in cleaned_list:
+        if len(c) == 10:
+            return c
+
+    # 4. Any other non-empty cleaned
+    if cleaned_list:
+        return cleaned_list[0]
+
+    return None
+
+
 def search_covers_by_title_and_author(
     title: str,
     author: str = "",
@@ -209,6 +249,7 @@ def search_covers_by_title_and_author(
                     doc_year = str(doc.get("first_publish_year") or "")
                     cover_id = doc.get("cover_i")
                     doc_isbns = doc.get("isbn", [])
+                    best_isbn = extract_best_isbn(doc_isbns)
 
                     cover_urls = []
                     if cover_id:
@@ -231,7 +272,7 @@ def search_covers_by_title_and_author(
                                         "year": doc_year,
                                         "source": "Open Library",
                                         "image_bytes": opt_bytes,
-                                        "isbn": doc_isbns[0] if doc_isbns else None
+                                        "isbn": best_isbn
                                     })
                                     break
                         except Exception:
@@ -267,6 +308,17 @@ def search_covers_by_title_and_author(
                     pdate = v.get("publishedDate", "")
                     it_year = pdate[:4] if pdate else ""
 
+                    industry_ids = v.get("industryIdentifiers", [])
+                    gb_isbns = []
+                    if isinstance(industry_ids, list):
+                        for id_entry in industry_ids:
+                            if isinstance(id_entry, dict) and id_entry.get("identifier"):
+                                if id_entry.get("type") == "ISBN_13":
+                                    gb_isbns.insert(0, id_entry["identifier"])
+                                else:
+                                    gb_isbns.append(id_entry["identifier"])
+                    gb_best_isbn = extract_best_isbn(gb_isbns)
+
                     img_links = v.get("imageLinks", {})
                     img_url = (
                         img_links.get("extraLarge")
@@ -290,7 +342,7 @@ def search_covers_by_title_and_author(
                                         "year": it_year,
                                         "source": "Google Books",
                                         "image_bytes": opt_bytes,
-                                        "isbn": None
+                                        "isbn": gb_best_isbn
                                     })
                                     if len(results) >= max_results:
                                         break

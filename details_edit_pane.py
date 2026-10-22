@@ -2,7 +2,6 @@ import threading
 import customtkinter as ctk
 # import tkinter as tk
 import PIL.Image as Image
-from PIL import ImageTk
 
 from db import db_get, db_update, db_add
 from windows.settings_helpers.cover_fetcher import auto_fetch_and_save_book_cover
@@ -51,9 +50,8 @@ class DetailsEditPane(ctk.CTkFrame):
         col3 = ctk.CTkFrame(details)
         col3.grid(row=0, column=2, sticky="nsew")
 
-        close_img = Image.open('assets/img/close_btn.png').convert('RGBA')
-        close_img = close_img.resize((20, 20))
-        close_img_display = ImageTk.PhotoImage(close_img)
+        close_pil = Image.open('assets/img/close_btn.png').convert('RGBA')
+        close_img = ctk.CTkImage(light_image=close_pil, dark_image=close_pil, size=(16, 16))
 
         self.edit_btn = ctk.CTkButton(bar, text="SAVE", width=50, fg_color="green", hover_color="darkgreen", command=lambda: self.save_book())
         self.edit_btn.grid(row=0, column=0, sticky="w", padx=5, pady=2)
@@ -61,8 +59,7 @@ class DetailsEditPane(ctk.CTkFrame):
         self.cancel_btn.grid(row=0, column=1, sticky="w", padx=5, pady=2)
         self.error_msg = ctk.CTkLabel(bar, text="", text_color="red")
 
-        close_btn = ctk.CTkButton(bar, image=close_img_display, text="", width=20, fg_color="transparent", command=self.app.close_book)
-        close_btn.image = close_img_display
+        close_btn = ctk.CTkButton(bar, image=close_img, text="", width=20, height=20, fg_color="transparent", hover_color="gray30", command=self.app.close_book)
         close_btn.grid(row=0, column=2, sticky="e", padx=5, pady=2)
 
         # Title

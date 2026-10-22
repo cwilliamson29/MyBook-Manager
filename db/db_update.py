@@ -53,6 +53,23 @@ def update_book_cover(book_id, image_data):
     finally:
         conn.close()
 
+def update_book_isbn(book_id, isbn):
+    """
+    Updates the ISBN for a book.
+    """
+    conn = get_connection()
+    cursor = conn.cursor()
+    try:
+        cursor.execute("UPDATE books SET isbn = ? WHERE id = ?", (isbn, book_id))
+        conn.commit()
+        return "success"
+    except sqlite3.Error as e:
+        print("SQLite error in update_book_isbn: ", e)
+        conn.rollback()
+        return str(e)
+    finally:
+        conn.close()
+
 def remove_book_topic(data):
     rem = """DELETE FROM book_topics WHERE book_id = ?"""
     db = add_to_db(rem, data)

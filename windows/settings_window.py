@@ -7,7 +7,7 @@ from datetime import datetime
 import tkinter as tk
 from tkinter import ttk, messagebox
 import customtkinter as ctk
-from PIL import Image, ImageTk
+from PIL import Image
 
 from db.config import DB_NAME
 from db import db_get, db_update

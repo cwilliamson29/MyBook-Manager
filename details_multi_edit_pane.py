@@ -1,6 +1,5 @@
 import customtkinter as ctk
 import PIL.Image as Image
-from PIL import ImageTk
 
 from db import db_get, db_update
 from windows.book_tabs.helpers.topics_scrollable import TopicsFrame
@@ -39,9 +38,8 @@ class DetailsMultiEditPane(ctk.CTkFrame):
         bar.pack(side="top", anchor="n", fill="x", expand=True)
         bar.columnconfigure(3, weight=1)
 
-        close_img = Image.open('assets/img/close_btn.png').convert('RGBA')
-        close_img = close_img.resize((20, 20))
-        close_img_display = ImageTk.PhotoImage(close_img)
+        close_pil = Image.open('assets/img/close_btn.png').convert('RGBA')
+        close_img = ctk.CTkImage(light_image=close_pil, dark_image=close_pil, size=(16, 16))
 
         self.save_btn = ctk.CTkButton(
             bar,
@@ -67,13 +65,14 @@ class DetailsMultiEditPane(ctk.CTkFrame):
 
         close_btn = ctk.CTkButton(
             bar,
-            image=close_img_display,
+            image=close_img,
             text="",
             width=20,
+            height=20,
             fg_color="transparent",
+            hover_color="gray30",
             command=self.app.close_book
         )
-        close_btn.image = close_img_display
         close_btn.grid(row=0, column=3, sticky="e", padx=5, pady=2)
 
         # Main details frame
