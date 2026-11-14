@@ -1,3 +1,4 @@
+import threading
 import tkinter as tk
 from tkinter import ttk
 import customtkinter as ctk
@@ -9,6 +10,8 @@ from book_table import BookTable
 from details_frame import DetailsFrame
 from windows.add_data_window import AddDataWindow
 from windows.settings_window import SettingsWindow
+from windows.settings_helpers.updater import load_updater_config, check_for_updates
+from windows.update_dialog import UpdateDialog
 
 
 # TODO: backups manual
@@ -61,6 +64,22 @@ class MyBookManager:
 
         app_label = ctk.CTkLabel(top_frame, text="MyBook Manager", font=("Arial", 16, "bold"), text_color=("#0969da", "#58a6ff"))
         app_label.grid(row=0, column=2, sticky="e", padx=4, pady=5)
+
+        self.latest_release_info = None
+        self.update_notify_btn = ctk.CTkButton(
+            top_frame,
+            text="🚀 Update Available",
+            font=("Arial", 11, "bold"),
+            fg_color="#238636",
+            hover_color="#2ea043",
+            height=30,
+            command=self.open_update_dialog
+        )
+        self.update_notify_btn.grid(row=0, column=2, sticky="e", padx=(0, 150), pady=5)
+        self.update_notify_btn.grid_remove()
+
+        # Background update check on launch
+        self.root.after(2500, self.background_startup_update_check)
 
         # self.book_id = tk.StringVar()
         self.details = DetailsFrame(self.details_framed, self)
@@ -282,6 +301,27 @@ class MyBookManager:
             return
 
         self.settings_window = SettingsWindow(self)
+
+    def background_startup_update_check(self):
+        config = load_updater_config()
+        if not config.get("auto_check_on_startup", True):
+            return
+
+        def _worker():
+            res = check_for_updates()
+            if res.get("success") and res.get("update_available"):
+                def _notify():
+                    self.latest_release_info = res
+                    ver = res.get("latest_version", "New")
+                    self.update_notify_btn.configure(text=f"🚀 v{ver} Available")
+                    self.update_notify_btn.grid()
+                self.root.after(0, _notify)
+
+        threading.Thread(target=_worker, daemon=True).start()
+
+    def open_update_dialog(self):
+        if self.latest_release_info and self.latest_release_info.get("update_available"):
+            UpdateDialog(self.root, self.latest_release_info)
 
     def show_book_details(self, book_id):
         self.details_framed.pack(side="top", fill="x", anchor="n", before=self.center_frame)

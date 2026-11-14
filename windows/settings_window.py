@@ -16,6 +16,17 @@ from windows.settings_helpers.backup_database import backup_database, quick_back
 from windows.settings_helpers.import_database import import_database
 from windows.settings_helpers.import_excel import import_excel_workbook
 from windows.settings_helpers.cover_fetcher import batch_fetch_covers_for_missing, fetch_cover_by_isbn
+from windows.settings_helpers.updater import (
+    APP_VERSION,
+    get_current_version,
+    get_configured_repo,
+    load_updater_config,
+    save_updater_config,
+    check_for_updates,
+    open_release_page,
+    get_platform_info
+)
+from windows.update_dialog import UpdateDialog
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
@@ -134,6 +145,7 @@ class SettingsWindow(ctk.CTkToplevel):
         self.db_tab = self.tabview.add("Database")
         self.authors_series_tab = self.tabview.add("Authors & Series")
         self.genres_tab = self.tabview.add("Genres")
+        self.covers_tab = self.tabview.add("Cover Retrieval")
         self.import_tab = self.tabview.add("Import Data")
         self.appearance_tab = self.tabview.add("Appearance")
         self.about_tab = self.tabview.add("About")
@@ -141,6 +153,7 @@ class SettingsWindow(ctk.CTkToplevel):
         self.build_database_tab()
         self.build_authors_series_tab()
         self.build_genres_tab()
+        self.build_covers_tab()
         self.build_import_tab()
         self.build_appearance_tab()
         self.build_about_tab()
@@ -1468,10 +1481,10 @@ class SettingsWindow(ctk.CTkToplevel):
             )
 
     # =========================================================================
-    # TAB 4: DATA IMPORT & COVERS
+    # TAB 4: AUTOMATIC COVER RETRIEVAL
     # =========================================================================
-    def build_import_tab(self):
-        tab = self.import_tab
+    def build_covers_tab(self):
+        tab = self.covers_tab
 
         # Card 1: Automatic ISBN Book Cover Retrieval
         cover_card = ctk.CTkFrame(tab, **self.card_style)
@@ -1565,9 +1578,52 @@ class SettingsWindow(ctk.CTkToplevel):
         )
         self.cancel_fetch_covers_btn.grid(row=0, column=1, sticky="ew")
 
-        # Card 2: Excel Workbook Import (.xlsx, .xlsm)
+        # Card 2: Cover Art Guidelines & Features
+        info_card = ctk.CTkFrame(tab, **self.card_style)
+        info_card.pack(fill="both", expand=True, padx=4, pady=(4, 6))
+
+        ctk.CTkLabel(
+            info_card,
+            text="How Automatic Cover Retrieval Works",
+            font=("Arial", 13, "bold"),
+            text_color=TEXT_PRIMARY
+        ).pack(anchor="w", padx=12, pady=(10, 2))
+
+        ctk.CTkLabel(
+            info_card,
+            text="Information about online artwork resolution, storage, and fallback mechanisms.",
+            font=("Arial", 11),
+            text_color=TEXT_MUTED
+        ).pack(anchor="w", padx=12, pady=(0, 8))
+
+        guide_box = ctk.CTkFrame(info_card, fg_color=INNER_BG, corner_radius=6, border_width=1, border_color=INNER_BORDER)
+        guide_box.pack(fill="x", padx=12, pady=4)
+
+        guide_items = [
+            ("Online Catalogs:", "Queries Open Library Covers API first, falling back to Google Books API."),
+            ("ISBN Sanitization:", "Supports ISBN-10 and ISBN-13 formats with automatic hyphen and whitespace cleanup."),
+            ("Local Database Storage:", "Downloaded images are compressed and stored directly in your SQLite database."),
+            ("Manual Overrides:", "You can also search and pick custom covers for any book individually via its details panel."),
+        ]
+
+        for item_title, item_desc in guide_items:
+            row = ctk.CTkFrame(guide_box, fg_color="transparent")
+            row.pack(fill="x", padx=10, pady=3)
+
+            ctk.CTkLabel(row, text=f"• {item_title}", width=150, font=("Arial", 10, "bold"), text_color=TEXT_PRIMARY, anchor="w").pack(side="left")
+            ctk.CTkLabel(row, text=item_desc, font=("Arial", 10), text_color=TEXT_MUTED, anchor="w").pack(side="left", fill="x", expand=True)
+
+        self.refresh_covers_stat()
+
+    # =========================================================================
+    # TAB 5: DATA IMPORT
+    # =========================================================================
+    def build_import_tab(self):
+        tab = self.import_tab
+
+        # Card: Excel Workbook Import (.xlsx, .xlsm)
         excel_card = ctk.CTkFrame(tab, **self.card_style)
-        excel_card.pack(fill="both", expand=True, padx=4, pady=(4, 6))
+        excel_card.pack(fill="both", expand=True, padx=4, pady=6)
 
         ctk.CTkLabel(
             excel_card,
@@ -1629,10 +1685,8 @@ class SettingsWindow(ctk.CTkToplevel):
         )
         import_btn.pack(fill="x", padx=12, pady=(8, 10))
 
-        self.refresh_covers_stat()
-
     # =========================================================================
-    # TAB 5: APPEARANCE
+    # TAB 6: APPEARANCE
     # =========================================================================
     def build_appearance_tab(self):
         tab = self.appearance_tab
@@ -1703,30 +1757,37 @@ class SettingsWindow(ctk.CTkToplevel):
             ctk.CTkLabel(row, text=desc, font=("Arial", 11), text_color=TEXT_MUTED, anchor="w").pack(side="left", fill="x", expand=True)
 
     # =========================================================================
-    # TAB 6: ABOUT & INFORMATION
+    # TAB 7: ABOUT & INFORMATION
     # =========================================================================
     def build_about_tab(self):
         tab = self.about_tab
 
+        self.updater_config = load_updater_config()
+        self.cached_release_info = None
+        self.is_checking_update = False
+
+        # Card 1: Application Information & System Specs
         about_card = ctk.CTkFrame(tab, **self.card_style)
-        about_card.pack(fill="both", expand=True, padx=4, pady=6)
+        about_card.pack(fill="x", padx=4, pady=(6, 4))
 
         ctk.CTkLabel(
             about_card,
             text="MyBook Manager",
             font=("Arial", 15, "bold"),
             text_color=TEXT_PRIMARY
-        ).pack(anchor="w", padx=12, pady=(12, 2))
+        ).pack(anchor="w", padx=12, pady=(10, 2))
 
         ctk.CTkLabel(
             about_card,
             text="Personal library and book cataloging management system.",
             font=("Arial", 11),
             text_color=TEXT_MUTED
-        ).pack(anchor="w", padx=12, pady=(0, 12))
+        ).pack(anchor="w", padx=12, pady=(0, 8))
 
+        plat_info = get_platform_info()
         info_rows = [
-            ("Application Version", "1.2.0"),
+            ("Application Version", f"v{APP_VERSION}"),
+            ("Platform OS", f"{plat_info['os_name']} ({plat_info['arch']})"),
             ("Python Runtime", f"{sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}"),
             ("SQLite Engine", sqlite3.sqlite_version),
             ("Database Path", str(DB_PATH)),
@@ -1735,10 +1796,113 @@ class SettingsWindow(ctk.CTkToplevel):
 
         for label_text, value_text in info_rows:
             row = ctk.CTkFrame(about_card, fg_color=INNER_BG, corner_radius=6, border_width=1, border_color=INNER_BORDER)
-            row.pack(fill="x", padx=12, pady=4)
+            row.pack(fill="x", padx=12, pady=2)
 
-            ctk.CTkLabel(row, text=label_text, width=140, font=("Arial", 11, "bold"), text_color=TEXT_MUTED, anchor="w").pack(side="left", padx=10, pady=6)
-            ctk.CTkLabel(row, text=value_text, font=("Arial", 11), text_color=TEXT_PRIMARY, anchor="w").pack(side="left", padx=10, pady=6, fill="x", expand=True)
+            ctk.CTkLabel(row, text=label_text, width=140, font=("Arial", 11, "bold"), text_color=TEXT_MUTED, anchor="w").pack(side="left", padx=10, pady=4)
+            ctk.CTkLabel(row, text=value_text, font=("Arial", 11), text_color=TEXT_PRIMARY, anchor="w").pack(side="left", padx=10, pady=4, fill="x", expand=True)
+
+        # Card 2: Software Updates & GitHub Releases
+        update_card = ctk.CTkFrame(tab, **self.card_style)
+        update_card.pack(fill="both", expand=True, padx=4, pady=(4, 6))
+
+        up_header = ctk.CTkFrame(update_card, fg_color="transparent")
+        up_header.pack(fill="x", padx=12, pady=(10, 2))
+
+        ctk.CTkLabel(
+            up_header,
+            text="Software Updates & Releases",
+            font=("Arial", 13, "bold"),
+            text_color=TEXT_PRIMARY
+        ).pack(side="left")
+
+        github_link_btn = ctk.CTkButton(
+            up_header,
+            text="GitHub Repository ↗",
+            width=130,
+            height=22,
+            font=("Arial", 10),
+            fg_color=BTN_SECONDARY_BG,
+            hover_color=BTN_SECONDARY_HOVER,
+            border_width=1,
+            border_color=BTN_SECONDARY_BORDER,
+            text_color=BTN_SECONDARY_TEXT,
+            command=lambda: open_release_page()
+        )
+        github_link_btn.pack(side="right")
+
+        ctk.CTkLabel(
+            update_card,
+            text="Automatically check for updates from GitHub releases across Linux, Windows, and macOS.",
+            font=("Arial", 11),
+            text_color=TEXT_MUTED
+        ).pack(anchor="w", padx=12, pady=(0, 8))
+
+        # Status & Version Banner Box
+        self.update_status_box = ctk.CTkFrame(update_card, fg_color=INNER_BG, corner_radius=6, border_width=1, border_color=INNER_BORDER)
+        self.update_status_box.pack(fill="x", padx=12, pady=4)
+
+        stat_inner = ctk.CTkFrame(self.update_status_box, fg_color="transparent")
+        stat_inner.pack(fill="x", padx=10, pady=6)
+
+        self.update_status_badge = ctk.CTkLabel(
+            stat_inner,
+            text=f"Current: v{APP_VERSION}  •  Status: Ready to check",
+            font=("Arial", 11, "bold"),
+            text_color=TEXT_PRIMARY,
+            anchor="w"
+        )
+        self.update_status_badge.pack(side="left", fill="x", expand=True)
+
+        self.check_updates_btn = ctk.CTkButton(
+            stat_inner,
+            text="Check for Updates",
+            width=120,
+            height=24,
+            font=("Arial", 11, "bold"),
+            fg_color="#1f6feb",
+            hover_color="#388bfd",
+            command=self.handle_check_for_updates
+        )
+        self.check_updates_btn.pack(side="right")
+
+        # Dynamic Action Area for New Updates
+        self.update_action_frame = ctk.CTkFrame(update_card, fg_color="transparent")
+        self.update_action_frame.pack(fill="x", padx=12, pady=4)
+
+        self.update_details_label = ctk.CTkLabel(
+            self.update_action_frame,
+            text="",
+            font=("Arial", 11),
+            text_color="#2ea043",
+            anchor="w"
+        )
+        self.update_details_label.pack(side="left", fill="x", expand=True)
+
+        self.open_update_dialog_btn = ctk.CTkButton(
+            self.update_action_frame,
+            text="View & Install Update...",
+            font=("Arial", 11, "bold"),
+            fg_color="#238636",
+            hover_color="#2ea043",
+            height=28,
+            command=self.open_update_modal
+        )
+        self.open_update_dialog_btn.pack(side="right")
+        self.open_update_dialog_btn.pack_forget()
+
+        # Startup Check Toggle
+        toggle_box = ctk.CTkFrame(update_card, fg_color="transparent")
+        toggle_box.pack(fill="x", padx=12, pady=(6, 10))
+
+        self.startup_check_var = ctk.BooleanVar(value=self.updater_config.get("auto_check_on_startup", True))
+        self.startup_check_switch = ctk.CTkCheckBox(
+            toggle_box,
+            text="Automatically check for updates on startup",
+            variable=self.startup_check_var,
+            font=("Arial", 11),
+            command=self.on_toggle_startup_check
+        )
+        self.startup_check_switch.pack(anchor="w")
 
     # =========================================================================
     # ACTIONS & HANDLERS
@@ -1887,6 +2051,77 @@ class SettingsWindow(ctk.CTkToplevel):
     def handle_excel_import(self):
         import_excel_workbook(self.app, parent=self)
         self.refresh_stats(custom_status="Excel import completed.")
+
+    def handle_check_for_updates(self):
+        if self.is_checking_update:
+            return
+
+        self.is_checking_update = True
+        self.check_updates_btn.configure(state="disabled", text="Checking...")
+        self.update_status_badge.configure(text=f"Current: v{APP_VERSION}  •  Connecting to GitHub...", text_color="#58a6ff")
+        self.update_details_label.configure(text="")
+        self.open_update_dialog_btn.pack_forget()
+
+        def _worker():
+            res = check_for_updates()
+
+            def _on_result():
+                self.is_checking_update = False
+                self.check_updates_btn.configure(state="normal", text="Check for Updates")
+                self.cached_release_info = res
+
+                if not res.get("success"):
+                    err = res.get("error", "Unknown error checking for updates.")
+                    self.update_status_badge.configure(text=f"Current: v{APP_VERSION}  •  Check Failed", text_color="#f85149")
+                    self.update_details_label.configure(text=err, text_color="#f85149")
+                    self.status_label.configure(text=f"Update check failed: {err}")
+                    return
+
+                if res.get("update_available"):
+                    latest_v = res.get("latest_version")
+                    self.update_status_badge.configure(
+                        text=f"Current: v{APP_VERSION}  •  🚀 Update Available: v{latest_v}!",
+                        text_color="#2ea043"
+                    )
+                    rel_name = res.get("release_name", f"Release {latest_v}")
+                    self.update_details_label.configure(
+                        text=f"✓ Found: {rel_name}",
+                        text_color="#2ea043"
+                    )
+                    self.open_update_dialog_btn.pack(side="right")
+                    self.status_label.configure(text=f"Update available: v{latest_v}")
+                    self.open_update_modal()
+                else:
+                    self.update_status_badge.configure(
+                        text=f"Current: v{APP_VERSION}  •  ✓ Up to date",
+                        text_color="#3fb950"
+                    )
+                    self.update_details_label.configure(
+                        text=f"MyBook Manager is running the latest release (v{APP_VERSION}).",
+                        text_color=TEXT_MUTED
+                    )
+                    self.status_label.configure(text="Application is up to date.")
+
+            self.after(0, _on_result)
+
+        threading.Thread(target=_worker, daemon=True).start()
+
+    def open_update_modal(self):
+        if self.cached_release_info and self.cached_release_info.get("update_available"):
+            UpdateDialog(self, self.cached_release_info, on_update_completed=self.on_update_completed)
+
+    def on_update_completed(self, release_info):
+        self.update_status_badge.configure(
+            text=f"Updated to: v{release_info.get('latest_version')}  •  Restart required",
+            text_color="#2ea043"
+        )
+        self.status_label.configure(text="Update installed successfully.")
+
+    def on_toggle_startup_check(self):
+        val = self.startup_check_var.get()
+        self.updater_config["auto_check_on_startup"] = val
+        save_updater_config(self.updater_config)
+        self.status_label.configure(text=f"Automatic startup update check {'enabled' if val else 'disabled'}.")
 
     def change_appearance_mode(self, new_mode):
         ctk.set_appearance_mode(new_mode)
