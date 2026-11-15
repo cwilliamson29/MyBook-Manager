@@ -1,3 +1,5 @@
+import os
+import sys
 import threading
 import tkinter as tk
 from tkinter import ttk
@@ -362,6 +364,13 @@ if __name__ == "__main__":
     ctk.set_appearance_mode("Dark")
 
     root = ctk.CTk()
+
+    # img = Image.open("assets/icon/MyBook_Manager_Taskbar_icon.png")
+    # img.save("app.ico", format="ICO", sizes=[(16,16), (32,32), (48,48), (256,256)])
+
+    basedir = getattr(sys, "_MEIPASS", os.path.abspath("."))
+    icon_path = os.path.join(basedir, "assets/icon/app.ico")
+    root.iconbitmap(icon_path)
 
     database.create_tables()
 
