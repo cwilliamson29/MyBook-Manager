@@ -2,3 +2,7 @@
 .idea
 /build
 *.xml
+/Pipfile
+/MyBook Manager.spec
+/Pipfile.lock
+/installer
