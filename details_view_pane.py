@@ -1,3 +1,6 @@
+import os
+import sys
+
 import customtkinter as ctk
 import requests
 import PIL.Image as Image
@@ -31,7 +34,8 @@ class DetailsViewPane(ctk.CTkFrame):
         col2 = ctk.CTkFrame(details, fg_color="transparent")
         col2.grid(row=0, column=1, sticky="nsew")
 
-        close_pil = Image.open('assets/img/close_btn.png').convert('RGBA')
+        img_path = self.get_resource_path('assets/img/close_btn.png')
+        close_pil = Image.open(img_path).convert('RGBA')
         close_img = ctk.CTkImage(light_image=close_pil, dark_image=close_pil, size=(16, 16))
 
         self.edit_btn = ctk.CTkButton(bar, text="EDIT", width=50, fg_color="#1f6feb", hover_color="#388bfd", command=lambda: self.par.edit_book(self.book[0]))
@@ -101,3 +105,8 @@ class DetailsViewPane(ctk.CTkFrame):
 
         self.desc_value = ctk.CTkLabel(col2, text=str(self.book[12]) if self.book[12] is not None else "")
         self.desc_value.grid(row=3, column=1, sticky="w", padx=padx, pady=pady)
+
+    def get_resource_path(self, relative_path):
+        if hasattr(sys, "_MEIPASS"):
+            return os.path.join(sys._MEIPASS, relative_path)
+        return os.path.join(os.path.abspath("."), relative_path)

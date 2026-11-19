@@ -1,3 +1,6 @@
+import os
+import sys
+
 import customtkinter as ctk
 import PIL.Image as Image
 
@@ -38,7 +41,8 @@ class DetailsMultiEditPane(ctk.CTkFrame):
         bar.pack(side="top", anchor="n", fill="x", expand=True)
         bar.columnconfigure(3, weight=1)
 
-        close_pil = Image.open('assets/img/close_btn.png').convert('RGBA')
+        img_path = self.get_resource_path('assets/img/close_btn.png')
+        close_pil = Image.open(img_path).convert('RGBA')
         close_img = ctk.CTkImage(light_image=close_pil, dark_image=close_pil, size=(16, 16))
 
         self.save_btn = ctk.CTkButton(
@@ -246,3 +250,8 @@ class DetailsMultiEditPane(ctk.CTkFrame):
             self.app.close_book()
         else:
             self.error_msg.configure(text=f"Error: {res}")
+
+    def get_resource_path(self, relative_path):
+        if hasattr(sys, "_MEIPASS"):
+            return os.path.join(sys._MEIPASS, relative_path)
+        return os.path.join(os.path.abspath("."), relative_path)

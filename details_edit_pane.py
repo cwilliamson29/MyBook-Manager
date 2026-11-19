@@ -1,3 +1,5 @@
+import os
+import sys
 import threading
 import customtkinter as ctk
 # import tkinter as tk
@@ -50,7 +52,8 @@ class DetailsEditPane(ctk.CTkFrame):
         col3 = ctk.CTkFrame(details, fg_color="transparent")
         col3.grid(row=0, column=2, sticky="nsew")
 
-        close_pil = Image.open('assets/img/close_btn.png').convert('RGBA')
+        img_path = self.get_resource_path('assets/img/close_btn.png')
+        close_pil = Image.open(img_path).convert('RGBA')
         close_img = ctk.CTkImage(light_image=close_pil, dark_image=close_pil, size=(16, 16))
 
         self.edit_btn = ctk.CTkButton(bar, text="SAVE", width=50, fg_color="#238636", hover_color="#2ea043", command=lambda: self.save_book())
@@ -279,3 +282,8 @@ class DetailsEditPane(ctk.CTkFrame):
         else:
             self.error_msg.configure(text=f"Error: {db_attempt}")
             self.error_msg.grid(row=0, column=2, sticky="w", padx=5, pady=2)
+
+    def get_resource_path(self, relative_path):
+        if hasattr(sys, "_MEIPASS"):
+            return os.path.join(sys._MEIPASS, relative_path)
+        return os.path.join(os.path.abspath("."), relative_path)

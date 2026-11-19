@@ -13,15 +13,12 @@ class AddDataWindow(ctk.CTkToplevel):
     def __init__(self, app):
         super().__init__(app.root)
 
-        self.withdraw()
-
         self.app = app
 
         self.title("Add New Data")
+        self.transient(app.root)
 
-        self.center_on_parent(app.root, 520, 700)
 
-        self.deiconify()
         # =========================
         # TABVIEW
         # =========================
@@ -72,6 +69,10 @@ class AddDataWindow(ctk.CTkToplevel):
 
         self.protocol("WM_DELETE_WINDOW", self.on_close)
 
+        self.geometry("520x700")
+        self.withdraw()
+        self.after(100, self._position_and_show)
+
     def refresh_book_tab_authors(self):
         self.book_tab.refresh_authors()
 
@@ -89,16 +90,32 @@ class AddDataWindow(ctk.CTkToplevel):
         self.app.add_window = None
         self.destroy()
 
-    def center_on_parent(self, parent, width, height):
-        parent.update_idletasks()
+    # def center_on_parent(self, parent, width, height):
+    #     parent.update_idletasks()
+    #
+    #     parent_x = parent.winfo_x()
+    #     parent_y = parent.winfo_y()
+    #
+    #     parent_width = parent.winfo_width()
+    #     parent_height = parent.winfo_height()
+    #
+    #     x = parent_x + (parent_width - width) // 2
+    #     y = parent_y + (parent_height - height) // 2
+    #
+    #     self.geometry(f"{width}x{height}+{x}+{y}")
 
-        parent_x = parent.winfo_x()
-        parent_y = parent.winfo_y()
+    def _position_and_show(self):
+        parent = self.app.root
 
-        parent_width = parent.winfo_width()
-        parent_height = parent.winfo_height()
+        if parent.winfo_width() <= 1:
+            self.after(50, self._position_and_show)
+            return
 
-        x = parent_x + (parent_width - width) // 2
-        y = parent_y + (parent_height - height) // 2
-
-        self.geometry(f"{width}x{height}+{x}+{y}")
+        x = parent.winfo_x() + (parent.winfo_width() - 520) // 2
+        y = parent.winfo_y() + (parent.winfo_height() - 700) // 2
+        self.attributes('-topmost', True)
+        self.attributes('-topmost', False)
+        self.lift()
+        self.focus()
+        self.geometry(f"520x700+{x}+{y}")
+        self.deiconify()

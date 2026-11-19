@@ -1,3 +1,5 @@
+import os
+import sys
 import tkinter as tk
 from tkinter import filedialog, messagebox
 from io import BytesIO
@@ -100,8 +102,9 @@ class DetailsFrame(ctk.CTkFrame):
 
     def load_default_cover(self):
         """Loads and displays the default fallback book image."""
+        img_path = self.get_resource_path('assets/img/default_book.webp')
         try:
-            def_book = Image.open('assets/img/default_book.webp')
+            def_book = Image.open(img_path)
             self.current_cover_img = self.create_cover_image(def_book)
             self.cover_label.configure(image=self.current_cover_img)
         except Exception as e:
@@ -294,3 +297,8 @@ class DetailsFrame(ctk.CTkFrame):
         response = requests.get(url)
         response.raise_for_status()
         return Image.open(BytesIO(response.content))
+
+    def get_resource_path(self, relative_path):
+        if hasattr(sys, "_MEIPASS"):
+            return os.path.join(sys._MEIPASS, relative_path)
+        return os.path.join(os.path.abspath("."), relative_path)

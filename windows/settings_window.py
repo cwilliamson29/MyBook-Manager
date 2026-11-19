@@ -51,12 +51,12 @@ class SettingsWindow(ctk.CTkToplevel):
     def __init__(self, app):
         super().__init__(app.root)
 
-        self.withdraw()
+        # self.withdraw()
         self.app = app
 
         self.title("Settings & Preferences")
-        self.center_on_parent(app.root, 640, 720)
         self.resizable(False, False)
+        self.transient(app.root)
 
         self.protocol("WM_DELETE_WINDOW", self.on_close)
 
@@ -158,7 +158,10 @@ class SettingsWindow(ctk.CTkToplevel):
         self.build_appearance_tab()
         self.build_about_tab()
 
-        self.deiconify()
+        # self.deiconify()
+        # self.center_on_parent(app.root, 640, 720)
+        self.geometry("640x720")
+        self.after(100, self._position_and_show)
 
     # =========================================================================
     # TAB 1: DATABASE MANAGEMENT
@@ -2133,17 +2136,18 @@ class SettingsWindow(ctk.CTkToplevel):
         self.app.settings_window = None
         self.destroy()
 
-    def center_on_parent(self, parent, width, height):
-        parent.update_idletasks()
 
-        parent_x = parent.winfo_x()
-        parent_y = parent.winfo_y()
+    def _position_and_show(self):
+        parent = self.app.root
 
-        parent_width = parent.winfo_width()
-        parent_height = parent.winfo_height()
+        if parent.winfo_width() <= 1:
+            self.after(50, self._position_and_show)
+            return
 
-        x = parent_x + (parent_width - width) // 2
-        y = parent_y + (parent_height - height) // 2
-
-        self.geometry(f"{width}x{height}+{x}+{y}")
-
+        x = parent.winfo_x() + (parent.winfo_width() - 640) // 2
+        y = parent.winfo_y() + (parent.winfo_height() - 720) // 2
+        self.geometry(f"640x720+{x}+{y}")
+        self.attributes('-topmost', True)
+        self.attributes('-topmost', False)
+        self.lift()
+        self.focus()

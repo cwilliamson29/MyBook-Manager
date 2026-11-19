@@ -33,7 +33,7 @@ class MyBookManager:
         self.center_window(1280, 800)
         self.root.protocol("WM_DELETE_WINDOW", self.on_app_close)
 
-        img_path = "assets/img/gear-icon.webp"
+        img_path = self.get_resource_path("assets/img/gear-icon.webp")
         gear_pil = Image.open(img_path)
         gear_img = ctk.CTkImage(light_image=gear_pil, dark_image=gear_pil, size=(22, 22))
 
@@ -359,6 +359,10 @@ class MyBookManager:
             self.details.cleanup()
         self.root.destroy()
 
+    def get_resource_path(self, relative_path):
+        if hasattr(sys, "_MEIPASS"):
+            return os.path.join(sys._MEIPASS, relative_path)
+        return os.path.join(os.path.abspath("."), relative_path)
 
 if __name__ == "__main__":
     ctk.set_appearance_mode("Dark")
@@ -371,6 +375,8 @@ if __name__ == "__main__":
     basedir = getattr(sys, "_MEIPASS", os.path.abspath("."))
     icon_path = os.path.join(basedir, "assets/icon/app.ico")
     root.iconbitmap(icon_path)
+
+    print(os.path.exists(os.path.join(getattr(sys, "_MEIPASS", "."), "assets/icon/app.ico")))
 
     database.create_tables()
 
